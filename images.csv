@@ -1,11 +1,20 @@
-filename,artist,album,genre
-Image/IMG_20240903_205043~2.jpg,Guns N' Roses,Tokyo 1992 (30th Anniversary Edition),Hard Rock
-Image/IMG_20240903_205056.jpg,Queen,Redlight Blues (The Lost BBC Sessions),Rock
-Image/IMG_20240903_205110.jpg,Queen,Session Experience (Golders Green Hippodrome 1973),Rock
-Image/IMG_20240903_205123.jpg,Pink Floyd,Secret Times,Progressive Rock
-Image/IMG_20240903_205202.jpg,Rage Against The Machine,The Battle of Mexico City (1999),Rap Metal
-Image/IMG_20240903_205226.jpg,Amy Winehouse,Glastonbury (2007),Soul / Jazz / Pop
-Image/IMG_20240903_205244.jpg,Rammstein,Rare Tracks and Singles Vol. 1,Industrial Metal
-Image/IMG_20240903_205320.jpg,Rammstein,Rare Tracks and Singles Vol. 2,Industrial Metal
-Image/IMG_20240903_205505.jpg,Suede,Live in Berlin (2002),Britpop / Alternative Rock
-
+path,title,CNO,genere,artist,album,year,price,format,label,note
+IMG_20240903_205043~2.jpg,Live in Tokyo,1,Hard Rock; Rock,Guns N' Roses,Tokyo 1992 (30th Anniversary Edition),1992,25,LP,Stop Records LTD,30th Anniversary Edition
+IMG_20240903_205056.jpg,Redlight Blues,1,Rock,Queen,Redlight Blues (The Lost BBC Sessions),1973,22,LP,BBC,Rare BBC Sessions
+IMG_20240903_205110.jpg,Session Experience,1,Rock,Queen,Session Experience (Golders Green Hippodrome 1973),1973,22,LP,BBC,Live Hippodrome London
+IMG_20240903_205123.jpg,Secret Times,1,Progressive Rock,Pink Floyd,Secret Times,1970,28,LP,Future Season,Compilation / Rare Tracks
+IMG_20240903_205202.jpg,Battle of Mexico City,1,Rap Metal,Rage Against The Machine,The Battle of Mexico City,1999,27,LP,Mousie V Records,Live in Mexico 1999
+IMG_20240903_205226.jpg,Amy at Glasto,0,Soul; Jazz; Pop,Amy Winehouse,Glastonbury,2007,18,LP,Late Lunch Records,Live at Glastonbury
+IMG_20240903_205244.jpg,Rare Tracks Vol. 1,1,Industrial Metal,Rammstein,Rare Tracks and Singles Vol. 1,1995,26,LP,Rage Again Records,Ltd Collector’s Edition
+IMG_20240903_205320.jpg,Rare Tracks Vol. 2,1,Industrial Metal,Rammstein,Rare Tracks and Singles Vol. 2,1997,26,LP,Rage Again Records,Ltd Collector’s Edition
+IMG_20240903_205505.jpg,Live in Berlin,1,Britpop; Alternative Rock,Suede,Live in Berlin,2002,24,LP,,Recorded at Universal Hall
+IMG_1.jpg,Live in Tokyo,1,Hard Rock; Rock,Guns N' Roses,Tokyo 1992,1992,25,LP,Geffen,Edizione 30th
+IMG_2.jpg,Amy at Glasto,0,Soul; Jazz,Amy Winehouse,Glastonbury,2007,18,CD,Island,Live Performance
+IMG_20240903_205612.jpg,Rarities Collection,1,Grunge; Alternative Rock,Mad Season,Rarities Collection,1995,23,LP,,Live & Demos
+IMG_20240903_205627.jpg,Maiden Tokyo,1,Heavy Metal,Iron Maiden,Maiden Tokyo,1981,28,LP,PVI Records,Live in Tokyo
+IMG_20240903_205638.jpg,ABBA Hits,1,Pop; Disco,ABBA,ABBA Hits,1975,20,LP,,Compilation
+IMG_20240903_205909.jpg,Born in Hell,1,Heavy Metal,Black Sabbath,Born in Hell (Live Worcester),1983,27,LP,Phase VII Records,Live Worcester 1983
+IMG_20240903_205921.jpg,Live and Dangerous,1,Electronic; Big Beat,The Prodigy,Live and Dangerous,1997,26,LP,,Rock am Ring
+IMG_20240903_205936.jpg,Glastonbury 1995,1,Alternative Rock; Gothic Rock,The Cure,Glastonbury Festival 1995,1995,28,LP,Mousie V Records,Green Vinyl
+IMG_20240903_205951.jpg,Budokan Tokyo 1981,1,Rock; New Wave,The Police,Budokan Tokyo 1981,1981,26,LP,,Red Marbled Vinyl
+IMG_20240903_210008.jpg,The Last Fix,1,Grunge,Nirvana,The Last Fix,1994,30,LP,Liquidator Records,Live in Rome
