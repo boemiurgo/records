@@ -8,55 +8,105 @@
 </head>
 <body class="min-h-screen bg-neutral-100 text-neutral-900">
   <main class="max-w-6xl mx-auto px-4 py-6">
-    <h1 class="text-2xl font-bold mb-6">Galleria immagini</h1>
+    <h1 class="text-2xl font-bold mb-4">Galleria immagini</h1>
+    <p class="text-sm text-neutral-600 mb-6">Semplice: inserisci un file <code>images.csv</code> con uno per riga: nome file oppure percorso relativo. Le immagini sono preferibilmente in <code>Image/</code>.</p>
+
+    <div id="status" class="text-sm text-neutral-500 mb-4"></div>
     <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
   </main>
 
   <script>
-    const IMAGE_DIR = 'Image/';
-    const SUPPORTED = ['jpg','jpeg','png','gif','webp','svg','avif'];
+    // ===== Config =====
+    const DEFAULT_DIR = 'Image/';              // se il CSV contiene solo il nome file, lo cerchiamo qui
+    const CSV_CANDIDATES = ['images.csv', 'Image/images.csv']; // dove proviamo a leggerlo
+    const EXTENSIONS = ['jpg','jpeg','png','gif','webp','svg','avif'];
 
-    async function loadImages() {
-      const repoInfo = (() => {
-        const { hostname, pathname } = window.location;
-        if (!hostname.endsWith('.github.io')) return null;
-        const owner = hostname.replace('.github.io','');
-        const parts = pathname.replace(/^\//,'').split('/').filter(Boolean);
-        return { owner, repo: parts[0] || `${owner}.github.io` };
-      })();
-      if (!repoInfo) return [];
-      const branches = ['gh-pages','main','master'];
-      for (const branch of branches) {
-        const apiUrl = `https://api.github.com/repos/${repoInfo.owner}/${repoInfo.repo}/contents/${IMAGE_DIR}?ref=${branch}`;
-        try {
-          const res = await fetch(apiUrl);
-          if (!res.ok) continue;
-          const data = await res.json();
-          return data.filter(f => f.type==='file' && SUPPORTED.some(ext=>f.name.toLowerCase().endsWith(ext)))
-                     .map(f => ({ name:f.name, url:`https://raw.githubusercontent.com/${repoInfo.owner}/${repoInfo.repo}/${branch}/${IMAGE_DIR}${f.name}` }));
-        } catch(e){}
-      }
-      return [];
+    // Risolve un percorso dal CSV: se non contiene '/', lo considera dentro DEFAULT_DIR
+    function resolvePath(raw) {
+      const s = raw.trim();
+      if (!s) return null;
+      if (/^https?:\/\//i.test(s) || s.startsWith('/')) return s; // URL assoluti o assoluto dal root
+      if (s.includes('/')) return s; // percorso relativo già completo (anche sottocartelle)
+      return DEFAULT_DIR + s; // semplice nome file -> dentro Image/
     }
 
-    function render(images) {
+    async function loadCSV() {
+      for (const path of CSV_CANDIDATES) {
+        try {
+          const res = await fetch(path, { cache: 'no-store' });
+          if (!res.ok) continue;
+          const text = await res.text();
+          return text;
+        } catch (_) { /* tenta prossimo candidato */ }
+      }
+      return null;
+    }
+
+    function parseCSV(text) {
+      // CSV minimale: ogni riga = "percorso, titolo opzionale"
+      // Supporta commenti con # e righe vuote.
+      const lines = text.split(/\r?\n/);
+      const items = [];
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const [pathPart, titlePart] = trimmed.split(',');
+        const path = resolvePath(pathPart || '');
+        if (!path) continue;
+        const name = path.split('/').pop();
+        const isImage = EXTENSIONS.some(ext => name.toLowerCase().endsWith('.' + ext));
+        if (!isImage) continue;
+        const title = (titlePart || name).trim();
+        items.push({ url: path, name, title });
+      }
+      return items;
+    }
+
+    function render(items) {
       const gallery = document.getElementById('gallery');
       gallery.innerHTML = '';
-      images.forEach(img => {
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-xl shadow p-2 flex flex-col items-center";
+      const frag = document.createDocumentFragment();
+      for (const it of items) {
+        const card = document.createElement('article');
+        card.className = 'bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200/60 overflow-hidden';
         card.innerHTML = `
-          <img src="${img.url}" alt="${img.name}" class="object-cover w-full h-48 rounded-md mb-2">
-          <p class="text-sm text-center truncate w-full">${img.name}</p>
-        `;
-        gallery.appendChild(card);
-      });
+          <div class="relative aspect-[4/3] bg-neutral-100 overflow-hidden">
+            <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover"/>
+          </div>
+          <div class="p-3">
+            <p class="text-sm font-medium truncate" title="${it.title}">${it.title}</p>
+            <a href="${it.url}" download class="text-xs underline decoration-dotted">Scarica</a>
+          </div>`;
+        frag.appendChild(card);
+      }
+      gallery.appendChild(frag);
     }
 
-    (async function(){
-      const images = await loadImages();
-      render(images);
+    function setStatus(msg) { document.getElementById('status').textContent = msg || ''; }
+
+    (async function init(){
+      setStatus('Cerco il file images.csv…');
+      const csv = await loadCSV();
+      if (!csv) {
+        setStatus('Aggiungi un file "images.csv" con un nome per riga (o percorso relativo). Esempio:\ncover.jpg\nsub/locandina.png');
+        return;
+      }
+      const items = parseCSV(csv);
+      if (!items.length) {
+        setStatus('Il CSV è vuoto o non contiene immagini supportate.');
+        return;
+      }
+      setStatus('');
+      render(items);
     })();
   </script>
+
+  <!--
+    Esempio di images.csv (nella root o in Image/):
+    # commenti sono ignorati
+    cover1.jpg
+    Image/extra/poster.png, Poster del live
+    sub/cartella/foto.webp, Scatto 01
+  -->
 </body>
 </html>
