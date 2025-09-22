@@ -268,23 +268,12 @@
         : `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='w-4 h-4' fill='currentColor'><path d='M22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24l5.46 4.72L5.82 21 12 17.27 18.18 21l-1.63-7.04L22 9.24ZM12 15.4 8.24 17.67l.99-4.28L6.5 10.5l4.38-.38L12 6l1.12 4.12 4.38.38-2.73 2.89.99 4.28L12 15.4Z'/></svg>`
     }
 
-    function metaBlock(it){
-      const artistLine = it.artist ? `<p class="text-xs text-neutral-700 truncate" title="${it.artist}">${it.artist}</p>` : '';
-      const albumLine  = it.album  ? `<p class="text-xs italic text-neutral-800 truncate" title="${it.album}">“${it.album}”</p>` : '';
-      const minor = [];
-      if (it.year) minor.push(it.year);
-      if (it.format) minor.push(it.format);
-      if (it.label) minor.push(it.label);
-      const minorLine = minor.length ? `<p class="text-[11px] text-neutral-500 truncate">${minor.join(' · ')}</p>` : '';
-      return artistLine + albumLine + minorLine;
-    }
-
     function genreTags(genres) {
       if (!genres || !genres.length) return '';
       return `<div class="mt-2 flex flex-wrap gap-1">${genres.map(g=>`<span class='text-[11px] px-2 py-0.5 rounded-full border border-neutral-300 bg-neutral-50'>${g}</span>`).join('')}</div>`;
     }
 
-    function metaBlock(it){
+    function metaRow(it){
       const bits = [];
       if (it.artist) bits.push(it.artist);
       if (it.album) bits.push(`“${it.album}”`);
@@ -320,30 +309,6 @@
         <article class="group bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200/70 overflow-hidden transition transform hover:-translate-y-[2px]">
           <div class="relative ${state.density==='compact' ? 'aspect-[4/3]' : 'aspect-[16/10]'} bg-neutral-100 overflow-hidden">
             ${badgeHTML(it.available)}
-            <button class="absolute right-3 top-3 p-2 rounded-lg ring-1 ring-neutral-200 bg-white/90 hover:bg-white" data-fav="${it.url}">${star(isFav)}</button>
-            <input type="checkbox" data-select="${it.url}" class="absolute left-3 bottom-3 w-4 h-4 rounded border-neutral-300 bg-white" ${checked}>
-            <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available ? '' : 'opacity-60'} group-hover:scale-[1.01] transition-transform" onerror="this.onerror=null;this.src='${PLACEHOLDER}';"/>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-black/0 to-transparent pointer-events-none"></div>
-            <div class="absolute right-3 bottom-3 flex flex-wrap gap-1">${it.year?`<span class='text-[10px] px-1.5 py-0.5 rounded-md bg-black/60 text-white backdrop-blur'>${it.year}</span>`:''}${it.format?`<span class='text-[10px] px-1.5 py-0.5 rounded-md bg-black/60 text-white backdrop-blur'>${it.format}</span>`:''}</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start gap-3">
-              <div class="min-w-0 grow">
-                <h3 class="text-sm font-medium truncate" title="${it.title}">${it.title}</h3>
-                ${metaBlock(it)}
-                ${it.genres?.length ? `<p class='text-[11px] text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
-              </div>
-              ${priceBadge(it)}
-            </div>
-            <div class="mt-3 flex items-center gap-2">
-              <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" target="_blank" aria-label="Apri in nuova scheda">${icon('open')}</a>
-              <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" download aria-label="Scarica">${icon('download')}</a>
-              <button class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" data-copy="${it.url}" aria-label="Copia link">${icon('copy')}</button>
-            </div>
-          </div>
-        </article>`;
-    } bg-neutral-100 overflow-hidden">
-            ${badgeHTML(it.available)}
             <input type="checkbox" data-select="${it.url}" class="absolute left-3 bottom-3 w-4 h-4 rounded border-neutral-300 bg-white" ${checked}>
             <button class="absolute right-3 top-3 p-2 rounded-lg ring-1 ring-neutral-200 bg-white/90 hover:bg-white" data-fav="${it.url}">${star(isFav)}</button>
             <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available ? '' : 'opacity-60'} group-hover:scale-[1.01] transition-transform" onerror="this.onerror=null;this.src='${PLACEHOLDER}';"/>
@@ -352,7 +317,7 @@
             <div class="flex items-start gap-3">
               <div class="min-w-0 grow">
                 <h3 class="text-sm font-medium truncate" title="${it.title}">${it.title}</h3>
-                ${metaBlock(it)}
+                ${metaRow(it)}
                 ${it.genres?.length ? `<p class='text-[11px] text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
               </div>
               ${priceBadge(it)}
@@ -378,7 +343,7 @@
               ${priceBadge(it)}
               ${badgeHTML(it.available)}
             </div>
-            ${metaBlock(it)}
+            ${metaRow(it)}
             ${it.genres?.length ? `<p class='text-[11px] text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
           </div>
           <div class="flex items-center gap-2">
