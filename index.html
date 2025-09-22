@@ -3,41 +3,84 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Galleria – Inventory Viewer</title>
+  <title>Inventario – Galleria</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner { width: 48px; height: 48px; border: 4px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: spin 1s linear infinite; }
-    .chip { @apply px-3 py-1 rounded-full text-sm border border-neutral-300 bg-white; }
-    .chip-active { @apply bg-black text-white border-black; }
+    .spinner { width: 56px; height: 56px; border: 5px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: spin .9s linear infinite; }
   </style>
 </head>
-<body class="min-h-screen bg-neutral-100 text-neutral-900 flex flex-col">
-  <main class="max-w-6xl mx-auto px-4 py-8 w-full">
-    <h1 class="text-2xl font-bold mb-4">Inventario</h1>
+<body class="min-h-screen bg-neutral-100 text-neutral-900">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-gradient-to-b from-white to-white/70 backdrop-blur border-b border-neutral-200/70">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-black text-white grid place-items-center shadow-sm">IV</div>
+      <div class="grow">
+        <h1 class="text-xl font-semibold tracking-tight">Inventario</h1>
+        <p class="text-xs text-neutral-500">Galleria da <code>images.csv</code> (path, title, CNO, genere)</p>
+      </div>
+      <a href="Image/" class="text-sm underline decoration-dotted" target="_blank" rel="noopener">Apri cartella</a>
+    </div>
+  </header>
 
-    <!-- Filtri -->
-    <section class="mb-5">
-      <div class="flex flex-col gap-3">
-        <div class="flex items-center gap-3 flex-wrap" id="genreChips">
-          <!-- chips genere generate here -->
-        </div>
-        <div class="flex items-center gap-3">
-          <label class="inline-flex items-center gap-2 text-sm">
-            <input id="onlyAvailable" type="checkbox" class="w-4 h-4"> Solo disponibili
-          </label>
-          <button id="clearFilters" class="text-sm underline decoration-dotted">Pulisci filtri</button>
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Controls -->
+    <section id="controls" class="mb-4">
+      <div class="bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200/70 p-3 md:p-4">
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col md:flex-row md:items-center gap-3">
+            <div class="relative md:grow">
+              <input id="search" type="search" placeholder="Cerca titolo…" class="w-full md:w-auto md:min-w-[320px] bg-neutral-50 border border-neutral-300 rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/10" />
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79L20 21.5 21.5 20l-6-6ZM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"/></svg>
+            </div>
+            <div class="flex items-center gap-3">
+              <label class="text-sm text-neutral-700">Ordina</label>
+              <select id="sort" class="border border-neutral-300 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black/10">
+                <option value="name-asc">Titolo A→Z</option>
+                <option value="name-desc">Titolo Z→A</option>
+                <option value="avail">Disponibili prima</option>
+              </select>
+              <label class="inline-flex items-center gap-2 text-sm select-none">
+                <span>Solo disponibili</span>
+                <button id="toggleAvail" type="button" class="relative inline-flex h-6 w-10 items-center rounded-full border border-neutral-300 bg-white transition">
+                  <span class="sr-only">Solo disponibili</span>
+                  <span id="knob" class="inline-block h-5 w-5 translate-x-0 rounded-full bg-neutral-400 transition"></span>
+                </button>
+              </label>
+              <button id="clearFilters" class="text-sm underline decoration-dotted">Pulisci</button>
+            </div>
+          </div>
+          <!-- Genres chips -->
+          <div id="genreChipsWrap" class="overflow-x-auto">
+            <div id="genreChips" class="flex items-center gap-2 min-h-[34px] pb-1"></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Loading overlay -->
-    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-neutral-100 z-50">
+    <!-- Loading overlay (no text) -->
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-neutral-100 z-50" role="status" aria-label="loading">
       <div class="spinner"></div>
     </div>
 
-    <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    <!-- Empty state -->
+    <section id="empty" class="hidden py-16 text-center text-neutral-500">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 h-12 mx-auto mb-3" fill="currentColor"><path d="M4 6h16v12H4z" opacity=".2"/><path d="M18 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 14H6V6h12v12Z"/></svg>
+      <p>Nessun elemento trovato.</p>
+    </section>
+
+    <!-- Grid -->
+    <section id="gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></section>
   </main>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="fixed inset-0 hidden items-center justify-center bg-black/80 p-4 z-50">
+    <button id="closeLightbox" class="absolute top-4 right-4 bg-white/90 hover:bg-white rounded-full p-2" aria-label="Chiudi">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6" fill="currentColor"><path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.18 12 2.89 5.71 4.3 4.29 10.59 10.6l6.3-6.3 1.41 1.41Z"/></svg>
+    </button>
+    <img id="lightboxImg" src="" alt="Anteprima" class="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl"/>
+    <div id="lightboxCaption" class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 px-3 py-1 rounded-lg text-sm"></div>
+  </div>
 
   <script>
     const DEFAULT_DIR = 'Image/';
@@ -45,12 +88,14 @@
     const EXTENSIONS = ['jpg','jpeg','png','gif','webp','svg','avif'];
 
     const state = {
-      items: [],            // {url,name,title,available,genres:[]}
+      items: [],               // {url,name,title,available,genres:[]}
       selectedGenres: new Set(),
       onlyAvailable: false,
-      allGenres: new Map(), // genre -> count
+      sort: 'name-asc',
+      allGenres: new Map(),    // genre -> count
     };
 
+    // ===== Helpers =====
     function resolvePath(raw) {
       const s = (raw||'').trim();
       if (!s) return null;
@@ -72,10 +117,7 @@
 
     function splitGenres(val) {
       if (!val) return [];
-      return val
-        .split(/[,;|\/]/) // separatori comuni: virgola, punto e virgola, pipe, slash
-        .map(s => s.trim())
-        .filter(Boolean);
+      return val.split(/[,;|\/]/).map(s => s.trim()).filter(Boolean);
     }
 
     function parseCSVSmart(text) {
@@ -105,10 +147,7 @@
         const cnoRaw = (parts[idxCno !== -1 ? idxCno : 2] || '').trim();
         const gRaw = idxGenre !== -1 ? parts[idxGenre] : '';
         const genres = splitGenres(gRaw);
-
-        // count genres
         genres.forEach(g => genreCounter.set(g, (genreCounter.get(g) || 0) + 1));
-
         const available = interpretCNO(cnoRaw);
         items.push({ url: path, name, title: titleRaw.trim(), available, genres });
       }
@@ -128,49 +167,82 @@
       return true;
     }
 
+    // ===== UI builders =====
     function badgeHTML(isAvailable) {
-      const base = 'absolute left-2 top-2 text-[11px] font-medium px-2 py-1 rounded-md shadow';
+      const base = 'absolute left-3 top-3 text-[11px] font-medium px-2.5 py-1 rounded-md shadow backdrop-blur';
       return isAvailable
         ? `<span class="${base} bg-emerald-600 text-white">Disponibile</span>`
         : `<span class="${base} bg-red-600 text-white">Non disponibile</span>`;
     }
 
+    function genreTags(genres) {
+      if (!genres || !genres.length) return '';
+      return `<div class="mt-2 flex flex-wrap gap-1">${genres.map(g=>`<span class='text-[11px] px-2 py-0.5 rounded-full border border-neutral-300 bg-neutral-50'>${g}</span>`).join('')}</div>`;
+    }
+
     function render(items) {
-      const gallery = document.getElementById('gallery');
-      gallery.innerHTML = '';
+      const grid = document.getElementById('gallery');
+      const empty = document.getElementById('empty');
+      grid.innerHTML = '';
+      empty.classList.toggle('hidden', items.length !== 0);
       const frag = document.createDocumentFragment();
-      for (const it of items) {
+
+      items.forEach(it => {
         const card = document.createElement('article');
-        card.className = 'bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200/60 overflow-hidden';
+        card.className = 'group bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200/70 overflow-hidden transition transform hover:-translate-y-[2px]';
         card.innerHTML = `
           <div class="relative aspect-[4/3] bg-neutral-100 overflow-hidden">
             ${badgeHTML(it.available)}
-            <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available ? '' : 'opacity-60'}"/>
+            <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available ? '' : 'opacity-60'} group-hover:scale-[1.01] transition-transform"/>
           </div>
-          <div class="p-3">
-            <p class="text-sm font-medium truncate" title="${it.title}">${it.title}</p>
-            ${it.genres?.length ? `<p class='text-xs text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
-            <div class="mt-2 flex items-center justify-between">
-              <a href="${it.url}" download class="text-xs underline decoration-dotted">Scarica</a>
+          <div class="p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h3 class="text-sm font-medium truncate" title="${it.title}">${it.title}</h3>
+                <p class="text-xs text-neutral-500 truncate" title="${it.name}">${it.name}</p>
+              </div>
+              <div class="shrink-0 flex items-center gap-2">
+                <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" target="_blank" aria-label="Apri in nuova scheda">${icon('open')}</a>
+                <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" download aria-label="Scarica">${icon('download')}</a>
+                <button class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" data-copy="${it.url}" aria-label="Copia link">${icon('copy')}</button>
+              </div>
             </div>
+            ${genreTags(it.genres)}
           </div>`;
+        // Lightbox
+        card.querySelector('img').addEventListener('click', () => openLightbox(it));
+        // Copy
+        card.querySelector('button[data-copy]')?.addEventListener('click', async (e)=>{
+          try { await navigator.clipboard.writeText(e.currentTarget.getAttribute('data-copy')); e.currentTarget.classList.add('bg-neutral-100'); setTimeout(()=>e.currentTarget.classList.remove('bg-neutral-100'), 500); } catch(_) {}
+        });
         frag.appendChild(card);
-      }
-      gallery.appendChild(frag);
+      });
+      grid.appendChild(frag);
     }
 
+    function icon(name){
+      const icons = {
+        open: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='w-4 h-4' fill='currentColor'><path d='M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3Z'/><path d='M5 5h6v2H7v10h10v-4h2v6H5V5Z'/></svg>`,
+        download: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='w-4 h-4' fill='currentColor'><path d='M5 20h14v-2H5v2ZM19 9h-4V3H9v6H5l7 7 7-7Z'/></svg>`,
+        copy: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='w-4 h-4' fill='currentColor'><path d='M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1Zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H8V7h11v14Z'/></svg>`
+      };
+      return icons[name] || '';
+    }
+
+    // ===== Filters & chips =====
     function buildGenreChips() {
       const wrap = document.getElementById('genreChips');
       wrap.innerHTML = '';
       const entries = Array.from(state.allGenres.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
       entries.forEach(([g, count]) => {
+        const active = state.selectedGenres.has(g);
         const btn = document.createElement('button');
-        btn.className = 'chip';
+        btn.className = `px-3 py-1 rounded-full text-sm border ${active ? 'bg-black text-white border-black' : 'bg-white text-neutral-800 border-neutral-300'} hover:bg-neutral-50 whitespace-nowrap`;
         btn.setAttribute('data-genre', g);
         btn.textContent = `${g} (${count})`;
         btn.addEventListener('click', () => {
           if (state.selectedGenres.has(g)) state.selectedGenres.delete(g); else state.selectedGenres.add(g);
-          btn.classList.toggle('chip-active');
+          buildGenreChips();
           applyFiltersAndRender();
         });
         wrap.appendChild(btn);
@@ -179,10 +251,14 @@
 
     function applyFilters(items) {
       let out = items;
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      if (q) out = out.filter(it => it.title.toLowerCase().includes(q) || it.name.toLowerCase().includes(q));
       if (state.onlyAvailable) out = out.filter(it => it.available);
-      if (state.selectedGenres.size) {
-        out = out.filter(it => it.genres?.some(g => state.selectedGenres.has(g)));
-      }
+      if (state.selectedGenres.size) out = out.filter(it => it.genres?.some(g => state.selectedGenres.has(g)));
+      // sort
+      if (state.sort === 'name-asc') out = out.slice().sort((a,b)=>a.title.localeCompare(b.title));
+      else if (state.sort === 'name-desc') out = out.slice().sort((a,b)=>b.title.localeCompare(a.title));
+      else if (state.sort === 'avail') out = out.slice().sort((a,b)=> (b.available===a.available) ? a.title.localeCompare(b.title) : (b.available - a.available));
       return out;
     }
 
@@ -191,33 +267,56 @@
       render(filtered);
     }
 
+    // ===== Lightbox =====
+    function openLightbox(it) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightboxImg').src = it.url;
+      document.getElementById('lightboxCaption').textContent = it.title || it.name;
+      lb.classList.remove('hidden');
+      lb.classList.add('flex');
+    }
+    function closeLight() {
+      const lb = document.getElementById('lightbox');
+      lb.classList.add('hidden');
+      lb.classList.remove('flex');
+      document.getElementById('lightboxImg').src = '';
+    }
+
+    // ===== Init =====
     (async function init(){
       const csv = await loadCSVText();
       state.items = csv ? parseCSVSmart(csv) : [];
       buildGenreChips();
       applyFiltersAndRender();
-      // UI handlers
-      document.getElementById('onlyAvailable').addEventListener('change', (e) => {
-        state.onlyAvailable = e.target.checked; applyFiltersAndRender();
-      });
-      document.getElementById('clearFilters').addEventListener('click', () => {
-        state.selectedGenres.clear();
-        document.querySelectorAll('#genreChips .chip').forEach(ch => ch.classList.remove('chip-active'));
-        document.getElementById('onlyAvailable').checked = false; state.onlyAvailable = false;
+
+      // Handlers
+      document.getElementById('search').addEventListener('input', applyFiltersAndRender);
+      document.getElementById('sort').addEventListener('change', (e)=>{ state.sort = e.target.value; applyFiltersAndRender(); });
+      document.getElementById('toggleAvail').addEventListener('click', (e)=>{
+        state.onlyAvailable = !state.onlyAvailable;
+        document.getElementById('knob').style.transform = state.onlyAvailable ? 'translateX(20px)' : 'translateX(0)';
+        e.currentTarget.classList.toggle('bg-black', state.onlyAvailable);
+        document.getElementById('knob').classList.toggle('bg-white', state.onlyAvailable);
+        document.getElementById('knob').classList.toggle('bg-neutral-400', !state.onlyAvailable);
         applyFiltersAndRender();
       });
+      document.getElementById('clearFilters').addEventListener('click', ()=>{
+        document.getElementById('search').value = '';
+        state.selectedGenres.clear();
+        state.onlyAvailable = false;
+        state.sort = 'name-asc';
+        document.getElementById('sort').value = 'name-asc';
+        document.getElementById('knob').style.transform = 'translateX(0)';
+        buildGenreChips();
+        applyFiltersAndRender();
+      });
+      document.getElementById('closeLightbox').addEventListener('click', closeLight);
+      document.getElementById('lightbox').addEventListener('click', (e)=>{ if (e.target.id === 'lightbox') closeLight(); });
+      document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeLight(); });
+
+      // hide loader
       document.getElementById('loading').style.display = 'none';
     })();
   </script>
-
-  <!--
-  CSV supportato (consigliato con intestazione):
-  path,title,CNO,genere
-  IMG_20240903_205043~2.jpg,Guns N' Roses — Tokyo 1992 (30th Ann.),1,Rock; Hard Rock
-  IMG_20240903_205226.jpg,Amy Winehouse — Glastonbury (2007-06-22),0,Soul / Jazz
-  Image/IMG_20240903_205601.jpg,Pink Floyd — Division Bell artwork,disponibile,Progressive Rock
-
-  Il campo "genere" può contenere più valori separati da virgola, punto e virgola, barra o pipe.
-  -->
 </body>
 </html>
