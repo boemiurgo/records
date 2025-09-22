@@ -74,46 +74,82 @@
     // === CONFIGURAZIONE ===
     const IMAGE_DIR = 'Image/';
 
-    // ⚠️ Metodo 1 (semplice): inserisci qui i nomi dei file presenti in Image/
-    // Esempio: ["cover1.jpg", "poster.png", "foto-roma.webp"]
+    // Fallback locale (opzionale) se GitHub API non è disponibile
     let IMAGES = [
       // "esempio.jpg"
     ];
 
-    // Metodo 2 (opzionale): se crei un file images.json nella root del sito (stesso livello di index.html)
-    // con dentro ["file1.jpg", "file2.png", ...], verrà caricato automaticamente.
+    // ====== 1) TENTATIVO AUTOMATICO: LISTA FILE CON GITHUB API ======
+    // Funziona su GitHub Pages (dominio *.github.io). Non richiede token (limite 60 req/ora IP).
+    function detectRepoInfo() {
+      const { hostname, pathname } = window.location;
+      const info = { owner: null, repo: null, branchCandidates: ['gh-pages','main','master'] };
+      if (hostname.endsWith('.github.io')) {
+        const owner = hostname.replace('.github.io','');
+        const parts = pathname.replace(/^\//,'').split('/').filter(Boolean);
+        // User/Org site: https://owner.github.io/ (repo is typically owner.github.io)
+        // Project site: https://owner.github.io/repo/
+        info.owner = owner;
+        info.repo = parts.length ? parts[0] : `${owner}.github.io`;
+      }
+      return info;
+    }
+
+    async function fetchImageListFromGitHub() {
+      const repoInfo = detectRepoInfo();
+      if (!repoInfo.owner || !repoInfo.repo) return null;
+
+      const exts = /\.(jpe?g|png|gif|webp|svg|avif)$/i;
+      for (const branch of repoInfo.branchCandidates) {
+        const apiUrl = `https://api.github.com/repos/${repoInfo.owner}/${repoInfo.repo}/contents/${IMAGE_DIR}?ref=${branch}`;
+        try {
+          const res = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github+json' } });
+          if (!res.ok) continue; // prova ramo successivo
+          const data = await res.json();
+          if (!Array.isArray(data)) continue;
+          const files = data
+            .filter(it => it.type === 'file' && exts.test(it.name))
+            .map(it => ({ name: it.name, url: `https://raw.githubusercontent.com/${repoInfo.owner}/${repoInfo.repo}/${branch}/${IMAGE_DIR}${it.name}` }));
+          if (files.length) return files;
+        } catch (_) { /* ignora e prova prossimo branch */ }
+      }
+      return null;
+    }
+
+    // ====== 2) FALLBACK: images.json nella root ======
     async function tryLoadManifest() {
       try {
         const res = await fetch('images.json', { cache: 'no-store' });
-        if (!res.ok) return false;
-        const data = await res.json();
-        if (Array.isArray(data) && data.length) {
-          IMAGES = data;
-          return true;
+        if (!res.ok) return null;
+        const arr = await res.json();
+        if (Array.isArray(arr) && arr.length) {
+          return arr.map(name => ({ name, url: IMAGE_DIR + name }));
         }
-      } catch (e) { /* ignoriamo */ }
-      return false;
+      } catch (_) {}
+      return null;
     }
 
-    // Utility: crea URL e alt dal filename
-    function toItem(name) {
-      const url = IMAGE_DIR + name;
-      const alt = name.replace(/[_-]+/g, ' ').replace(/\.[^.]+$/, '');
-      return { name, url, alt };
+    // ====== Utility ======
+    function toItem(nameOrObj) {
+      if (typeof nameOrObj === 'string') {
+        return { name: nameOrObj, url: IMAGE_DIR + nameOrObj };
+      }
+      return nameOrObj;
     }
+    function toAlt(name) { return name.replace(/[_-]+/g, ' ').replace(/\.[^.]+$/, ''); }
 
     // Rendering griglia
     function renderGrid(items) {
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
-
       const frag = document.createDocumentFragment();
       for (const it of items) {
+        const alt = toAlt(it.name);
         const card = document.createElement('article');
         card.className = 'card group bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200/60 overflow-hidden';
         card.innerHTML = `
           <div class="relative aspect-[4/3] bg-neutral-100 overflow-hidden">
-            <img data-src="${it.url}" alt="${it.alt}" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform"/>
+            <img data-src="${it.url}" alt="${alt}" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform"/>
             <a href="${it.url}" download class="absolute bottom-3 right-3 text-xs bg-white/90 hover:bg-white px-2 py-1 rounded-lg shadow">Scarica</a>
           </div>
           <div class="p-4 flex items-center gap-3">
@@ -126,14 +162,11 @@
             </div>
           </div>
         `;
-
-        // Lightbox on click
-        card.querySelector('img').addEventListener('click', () => openLightbox(it));
+        card.querySelector('img').addEventListener('click', () => openLightbox({ ...it, alt }));
         frag.appendChild(card);
       }
       grid.appendChild(frag);
 
-      // Lazy loading con IntersectionObserver
       const imgs = grid.querySelectorAll('img[data-src]');
       const io = new IntersectionObserver((entries, obs) => {
         for (const entry of entries) {
@@ -151,10 +184,11 @@
       list.innerHTML = '';
       const frag = document.createDocumentFragment();
       for (const it of items) {
+        const alt = toAlt(it.name);
         const li = document.createElement('li');
         li.className = 'flex items-center gap-3 px-4 py-3 hover:bg-neutral-50';
         li.innerHTML = `
-          <img src="${it.url}" alt="${it.alt}" loading="lazy" class="w-14 h-10 object-cover rounded-lg ring-1 ring-neutral-200/60"/>
+          <img src="${it.url}" alt="${alt}" loading="lazy" class="w-14 h-10 object-cover rounded-lg ring-1 ring-neutral-200/60"/>
           <div class="min-w-0 grow">
             <p class="text-sm font-medium truncate" title="${it.name}">${it.name}</p>
             <p class="text-xs text-neutral-500">${it.url}</p>
@@ -164,7 +198,7 @@
             <a href="${it.url}" download class="text-sm">Scarica</a>
           </div>
         `;
-        li.querySelector('img').addEventListener('click', () => openLightbox(it));
+        li.querySelector('img').addEventListener('click', () => openLightbox({ ...it, alt }));
         frag.appendChild(li);
       }
       list.appendChild(frag);
@@ -219,37 +253,15 @@
     // Inizializzazione
     (async function init() {
       setView('grid');
+      setStatus('Carico elenco immagini…');
 
-      // Prova a caricare images.json, se non presente rimaniamo sull'array IMAGES
-      const fromManifest = await tryLoadManifest();
-      if (!fromManifest && IMAGES.length === 0) {
-        setStatus('Suggerimento: aggiungi i file alla costante IMAGES o crea un images.json nella root.');
-      }
+      let items = [];
 
-      let items = IMAGES.map(toItem);
-      renderAll(items);
-
-      // Listener controlli
-      document.getElementById('search').addEventListener('input', () => renderAll(items));
-      document.getElementById('sort').addEventListener('change', () => renderAll(items));
-      document.getElementById('gridBtn').addEventListener('click', () => setView('grid'));
-      document.getElementById('listBtn').addEventListener('click', () => setView('list'));
-      document.getElementById('closeLightbox').addEventListener('click', closeLight);
-      document.getElementById('lightbox').addEventListener('click', (e) => { if (e.target.id === 'lightbox') closeLight(); });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLight(); });
-
-      // Se il manifest arriva dopo (es. caricato in un secondo momento), ricarica
-      try {
-        const res = await fetch('images.json', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length) {
-            IMAGES = data; items = IMAGES.map(toItem); renderAll(items); setStatus('');
-          }
-        }
-      } catch (_) {}
-    })();
-  </script>
+      // 1) Prova GitHub API (auto)
+      const ghItems = await fetchImageListFromGitHub();
+      if (ghItems && ghItems.length) {
+        items = ghItems.map(toItem);
+      } else {
 
   <!--
   ISTRUZIONI RAPIDE
