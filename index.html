@@ -3,30 +3,45 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Galleria – Image/ + CSV (CNO)</title>
+  <title>Galleria – Inventory Viewer</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #111827;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-neutral-100 text-neutral-900">
-  <main class="max-w-6xl mx-auto px-4 py-8">
-    <h1 class="text-2xl font-bold mb-2">Galleria immagini</h1>
-    <p class="text-sm text-neutral-600 mb-6">Legge <code>images.csv</code> (root o <code>Image/</code>). Colonne: <strong>path</strong>, <strong>title</strong> (opz.), <strong>CNO</strong> (Disponibile/Non disponibile). Nessuna API esterna.</p>
+<body class="min-h-screen bg-neutral-100 text-neutral-900 flex flex-col">
+  <main class="max-w-6xl mx-auto px-4 py-8 w-full">
+    <h1 class="text-2xl font-bold mb-6">Inventario</h1>
 
-    <div id="status" class="text-sm text-neutral-500 mb-4"></div>
+    <!-- Loading overlay -->
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-neutral-100 z-50">
+      <div class="spinner"></div>
+    </div>
+
     <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
   </main>
 
   <script>
-    // ===== Config =====
-    const DEFAULT_DIR = 'Image/';              // se il CSV contiene solo il nome file, lo cerchiamo qui
-    const CSV_CANDIDATES = ['images.csv', 'Image/images.csv']; // dove proviamo a leggerlo
+    const DEFAULT_DIR = 'Image/';
+    const CSV_CANDIDATES = ['images.csv', 'Image/images.csv'];
     const EXTENSIONS = ['jpg','jpeg','png','gif','webp','svg','avif'];
 
     function resolvePath(raw) {
       const s = (raw||'').trim();
       if (!s) return null;
       if (/^https?:\/\//i.test(s) || s.startsWith('/')) return s;
-      if (s.includes('/')) return s; // percorso relativo completo
-      return DEFAULT_DIR + s; // solo nome file => dentro Image/
+      if (s.includes('/')) return s;
+      return DEFAULT_DIR + s;
     }
 
     async function loadCSVText() {
@@ -41,14 +56,10 @@
     }
 
     function parseCSVSmart(text) {
-      // Supporta: con/intestazione oppure senza. Separatore ",".
       const lines = text.split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('#'));
       if (!lines.length) return [];
-
-      // rileva header
       const first = lines[0].split(',').map(s=>s.trim().toLowerCase());
       const hasHeader = first.includes('path') || first.includes('title') || first.includes('cno');
-
       const header = hasHeader ? first : ['path','title','cno'];
       const rows = hasHeader ? lines.slice(1) : lines;
 
@@ -73,16 +84,13 @@
     }
 
     function interpretCNO(val) {
-      // True se disponibile. Accetta: 1,y,yes,true,ok,available,disponibile
-      if (!val) return true; // default disponibile
+      if (!val) return true;
       const v = val.toString().trim().toLowerCase();
       const truthy = ['1','y','yes','true','ok','available','disponibile','si','sì'];
       const falsy  = ['0','n','no','false','unavailable','non disponibile','nd','soldout','esaurito'];
       if (truthy.includes(v)) return true;
       if (falsy.includes(v)) return false;
-      // numerici diversi da 0 => true
       if (!Number.isNaN(Number(v))) return Number(v) !== 0;
-      // default
       return true;
     }
 
@@ -90,7 +98,7 @@
       const base = 'absolute left-2 top-2 text-[11px] font-medium px-2 py-1 rounded-md shadow';
       return isAvailable
         ? `<span class="${base} bg-emerald-600 text-white">Disponibile</span>`
-        : `<span class="${base} bg-neutral-400 text-white">Non disponibile</span>`;
+        : `<span class="${base} bg-red-600 text-white">Non disponibile</span>`;
     }
 
     function render(items) {
@@ -103,7 +111,7 @@
         card.innerHTML = `
           <div class="relative aspect-[4/3] bg-neutral-100 overflow-hidden">
             ${badgeHTML(it.available)}
-            <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available ? '' : 'opacity-70'}"/>
+            <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available ? '' : 'opacity-60'}"/>
           </div>
           <div class="p-3 flex items-center justify-between gap-3">
             <p class="text-sm font-medium truncate" title="${it.title}">${it.title}</p>
@@ -114,36 +122,13 @@
       gallery.appendChild(frag);
     }
 
-    function setStatus(msg) { document.getElementById('status').textContent = msg || ''; }
-
     (async function init(){
-      setStatus('Cerco il file images.csv…');
       const csv = await loadCSVText();
-      if (!csv) {
-        setStatus('Aggiungi un file "images.csv" con intestazione oppure senza. Colonne: path,title,CNO');
-        return;
-      }
-      const items = parseCSVSmart(csv);
-      if (!items.length) {
-        setStatus('Il CSV è vuoto o non contiene immagini supportate.');
-        return;
-      }
-      setStatus('');
+      let items = [];
+      if (csv) items = parseCSVSmart(csv);
       render(items);
+      document.getElementById('loading').style.display = 'none';
     })();
   </script>
-
-  <!--
-  Esempio di images.csv con intestazione:
-  path,title,CNO
-  IMG_20240903_205043~2.jpg,Guns N' Roses — Tokyo 1992 (30th Ann.),1
-  IMG_20240903_205226.jpg,Amy Winehouse — Glastonbury (2007-06-22),0
-  Image/IMG_20240903_205601.jpg,Pink Floyd — Division Bell artwork,disponibile
-
-  Senza intestazione (ordine: path,title,CNO):
-  IMG_20240903_205043~2.jpg,Guns N' Roses — Tokyo 1992 (30th Ann.),1
-  IMG_20240903_205226.jpg,Amy Winehouse — Glastonbury (2007-06-22),0
-  Image/IMG_20240903_205601.jpg,Pink Floyd — Division Bell artwork,disponibile
-  -->
 </body>
 </html>
