@@ -6,22 +6,30 @@
   <title>Galleria – Inventory Viewer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid #e5e7eb;
-      border-top-color: #111827;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 48px; height: 48px; border: 4px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: spin 1s linear infinite; }
+    .chip { @apply px-3 py-1 rounded-full text-sm border border-neutral-300 bg-white; }
+    .chip-active { @apply bg-black text-white border-black; }
   </style>
 </head>
 <body class="min-h-screen bg-neutral-100 text-neutral-900 flex flex-col">
   <main class="max-w-6xl mx-auto px-4 py-8 w-full">
-    <h1 class="text-2xl font-bold mb-6">Inventario</h1>
+    <h1 class="text-2xl font-bold mb-4">Inventario</h1>
+
+    <!-- Filtri -->
+    <section class="mb-5">
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-3 flex-wrap" id="genreChips">
+          <!-- chips genere generate here -->
+        </div>
+        <div class="flex items-center gap-3">
+          <label class="inline-flex items-center gap-2 text-sm">
+            <input id="onlyAvailable" type="checkbox" class="w-4 h-4"> Solo disponibili
+          </label>
+          <button id="clearFilters" class="text-sm underline decoration-dotted">Pulisci filtri</button>
+        </div>
+      </div>
+    </section>
 
     <!-- Loading overlay -->
     <div id="loading" class="fixed inset-0 flex items-center justify-center bg-neutral-100 z-50">
@@ -35,6 +43,13 @@
     const DEFAULT_DIR = 'Image/';
     const CSV_CANDIDATES = ['images.csv', 'Image/images.csv'];
     const EXTENSIONS = ['jpg','jpeg','png','gif','webp','svg','avif'];
+
+    const state = {
+      items: [],            // {url,name,title,available,genres:[]}
+      selectedGenres: new Set(),
+      onlyAvailable: false,
+      allGenres: new Map(), // genre -> count
+    };
 
     function resolvePath(raw) {
       const s = (raw||'').trim();
@@ -55,19 +70,30 @@
       return null;
     }
 
+    function splitGenres(val) {
+      if (!val) return [];
+      return val
+        .split(/[,;|\/]/) // separatori comuni: virgola, punto e virgola, pipe, slash
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+
     function parseCSVSmart(text) {
       const lines = text.split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('#'));
       if (!lines.length) return [];
       const first = lines[0].split(',').map(s=>s.trim().toLowerCase());
-      const hasHeader = first.includes('path') || first.includes('title') || first.includes('cno');
-      const header = hasHeader ? first : ['path','title','cno'];
+      const hasHeader = first.includes('path') || first.includes('title') || first.includes('cno') || first.includes('genere') || first.includes('genre') || first.includes('genres');
+      const header = hasHeader ? first : ['path','title','cno','genere'];
       const rows = hasHeader ? lines.slice(1) : lines;
 
       const idxPath = header.indexOf('path');
       const idxTitle = header.indexOf('title');
       const idxCno = header.indexOf('cno');
+      const idxGenre = header.indexOf('genere') !== -1 ? header.indexOf('genere') : (header.indexOf('genre') !== -1 ? header.indexOf('genre') : header.indexOf('genres'));
 
       const items = [];
+      const genreCounter = new Map();
+
       for (const raw of rows) {
         const parts = raw.split(',');
         const path = resolvePath(parts[idxPath !== -1 ? idxPath : 0]);
@@ -77,9 +103,17 @@
         if (!isImg) continue;
         const titleRaw = parts[idxTitle !== -1 ? idxTitle : 1] || name;
         const cnoRaw = (parts[idxCno !== -1 ? idxCno : 2] || '').trim();
+        const gRaw = idxGenre !== -1 ? parts[idxGenre] : '';
+        const genres = splitGenres(gRaw);
+
+        // count genres
+        genres.forEach(g => genreCounter.set(g, (genreCounter.get(g) || 0) + 1));
+
         const available = interpretCNO(cnoRaw);
-        items.push({ url: path, name, title: titleRaw.trim(), available });
+        items.push({ url: path, name, title: titleRaw.trim(), available, genres });
       }
+
+      state.allGenres = genreCounter;
       return items;
     }
 
@@ -113,22 +147,77 @@
             ${badgeHTML(it.available)}
             <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available ? '' : 'opacity-60'}"/>
           </div>
-          <div class="p-3 flex items-center justify-between gap-3">
+          <div class="p-3">
             <p class="text-sm font-medium truncate" title="${it.title}">${it.title}</p>
-            <a href="${it.url}" download class="text-xs underline decoration-dotted">Scarica</a>
+            ${it.genres?.length ? `<p class='text-xs text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
+            <div class="mt-2 flex items-center justify-between">
+              <a href="${it.url}" download class="text-xs underline decoration-dotted">Scarica</a>
+            </div>
           </div>`;
         frag.appendChild(card);
       }
       gallery.appendChild(frag);
     }
 
+    function buildGenreChips() {
+      const wrap = document.getElementById('genreChips');
+      wrap.innerHTML = '';
+      const entries = Array.from(state.allGenres.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
+      entries.forEach(([g, count]) => {
+        const btn = document.createElement('button');
+        btn.className = 'chip';
+        btn.setAttribute('data-genre', g);
+        btn.textContent = `${g} (${count})`;
+        btn.addEventListener('click', () => {
+          if (state.selectedGenres.has(g)) state.selectedGenres.delete(g); else state.selectedGenres.add(g);
+          btn.classList.toggle('chip-active');
+          applyFiltersAndRender();
+        });
+        wrap.appendChild(btn);
+      });
+    }
+
+    function applyFilters(items) {
+      let out = items;
+      if (state.onlyAvailable) out = out.filter(it => it.available);
+      if (state.selectedGenres.size) {
+        out = out.filter(it => it.genres?.some(g => state.selectedGenres.has(g)));
+      }
+      return out;
+    }
+
+    function applyFiltersAndRender() {
+      const filtered = applyFilters(state.items);
+      render(filtered);
+    }
+
     (async function init(){
       const csv = await loadCSVText();
-      let items = [];
-      if (csv) items = parseCSVSmart(csv);
-      render(items);
+      state.items = csv ? parseCSVSmart(csv) : [];
+      buildGenreChips();
+      applyFiltersAndRender();
+      // UI handlers
+      document.getElementById('onlyAvailable').addEventListener('change', (e) => {
+        state.onlyAvailable = e.target.checked; applyFiltersAndRender();
+      });
+      document.getElementById('clearFilters').addEventListener('click', () => {
+        state.selectedGenres.clear();
+        document.querySelectorAll('#genreChips .chip').forEach(ch => ch.classList.remove('chip-active'));
+        document.getElementById('onlyAvailable').checked = false; state.onlyAvailable = false;
+        applyFiltersAndRender();
+      });
       document.getElementById('loading').style.display = 'none';
     })();
   </script>
+
+  <!--
+  CSV supportato (consigliato con intestazione):
+  path,title,CNO,genere
+  IMG_20240903_205043~2.jpg,Guns N' Roses — Tokyo 1992 (30th Ann.),1,Rock; Hard Rock
+  IMG_20240903_205226.jpg,Amy Winehouse — Glastonbury (2007-06-22),0,Soul / Jazz
+  Image/IMG_20240903_205601.jpg,Pink Floyd — Division Bell artwork,disponibile,Progressive Rock
+
+  Il campo "genere" può contenere più valori separati da virgola, punto e virgola, barra o pipe.
+  -->
 </body>
 </html>
