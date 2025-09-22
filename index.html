@@ -8,6 +8,9 @@
   <style>
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { width: 56px; height: 56px; border: 5px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: spin .9s linear infinite; }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
   </style>
 </head>
 <body class="min-h-screen bg-neutral-100 text-neutral-900">
@@ -17,7 +20,9 @@
       <div class="w-9 h-9 rounded-xl bg-black text-white grid place-items-center shadow-sm select-none">IV</div>
       <div class="grow min-w-0">
         <h1 class="text-xl font-semibold tracking-tight truncate">Inventario</h1>
-        <p class="text-xs text-neutral-500 truncate">CSV: <code>path,title,CNO,genere,[artist,album,year,price,format,label,note]</code></p>
+        <p class="text-xs text-neutral-500 truncate">
+          CSV: <code>path,title,CNO,genere,[artist,album,year,qty,format,label,note]</code>
+        </p>
       </div>
       <div class="hidden sm:flex items-center gap-2">
         <a href="Image/" class="text-sm underline decoration-dotted" target="_blank" rel="noopener">Apri cartella</a>
@@ -41,8 +46,6 @@
                 <option value="title-asc">Titolo A→Z</option>
                 <option value="title-desc">Titolo Z→A</option>
                 <option value="avail">Disponibili prima</option>
-                <option value="price-asc">Prezzo ↑</option>
-                <option value="price-desc">Prezzo ↓</option>
                 <option value="year-desc">Anno ↓</option>
                 <option value="year-asc">Anno ↑</option>
               </select>
@@ -139,8 +142,8 @@
     const PLACEHOLDER = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='600' height='450'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-family='sans-serif' font-size='18'>Anteprima non disponibile</text></svg>`)}`;
 
     const state = {
-      rawItems: [],            // original parsed
-      items: [],               // normalized {url,name,title,available,genres:[], artist, album, year, price, format, label, note}
+      rawItems: [],
+      items: [],               // {url,name,title,available,genres:[], artist, album, year, format, label, note}
       selectedGenres: new Set(),
       onlyAvailable: false,
       sort: 'title-asc',
@@ -149,10 +152,32 @@
       perPage: 12,
       page: 1,
       favoritesOnly: false,
-      favorites: new Set(JSON.parse(localStorage.getItem('iv:favs')||'[]')), // key: url
-      selection: new Set(), // selected urls
-      allGenres: new Map(), // genre -> count
+      favorites: new Set(JSON.parse(localStorage.getItem('iv:favs')||'[]')),// key: url
+      selection: new Set(),    // selected urls
+      allGenres: new Map(),    // genre -> count
+      quantities: Object.freeze(loadQtyMap()) // url -> number (int)
     };
+
+    function loadQtyMap() {
+      try {
+        const m = JSON.parse(localStorage.getItem('iv:qty') || '{}');
+        // sanitize to non-negative integers
+        for (const k in m) {
+          const v = parseInt(m[k], 10);
+          m[k] = Number.isFinite(v) && v >= 0 ? v : 0;
+        }
+        return m;
+      } catch { return {}; }
+    }
+    function saveQtyMap() {
+      localStorage.setItem('iv:qty', JSON.stringify(state.quantities));
+    }
+    function getQty(url){ return state.quantities[url] ?? 0; }
+    function setQty(url, val){
+      const v = Math.max(0, Math.floor(Number(val)||0));
+      state.quantities = { ...state.quantities, [url]: v };
+      saveQtyMap();
+    }
 
     // ===== Helpers =====
     function resolvePath(raw) {
@@ -184,8 +209,8 @@
       if (!lines.length) return [];
       const rawHeader = lines[0].split(',');
       const first = rawHeader.map(s=>s.trim().toLowerCase());
-      const hasHeader = first.includes('path') || first.includes('title') || first.includes('cno') || first.includes('genere') || first.includes('artist') || first.includes('album') || first.includes('year') || first.includes('price') || first.includes('format') || first.includes('label') || first.includes('note');
-      const header = hasHeader ? first : ['path','title','cno','genere','artist','album','year','price','format','label','note'];
+      const hasHeader = first.includes('path') || first.includes('title') || first.includes('cno') || first.includes('genere') || first.includes('artist') || first.includes('album') || first.includes('year') || first.includes('format') || first.includes('label') || first.includes('note');
+      const header = hasHeader ? first : ['path','title','cno','genere','artist','album','year','format','label','note'];
       const rows = hasHeader ? lines.slice(1) : lines;
 
       const idx = (name) => header.indexOf(name);
@@ -196,7 +221,6 @@
       const idxArtist = idx('artist');
       const idxAlbum = idx('album');
       const idxYear = idx('year');
-      const idxPrice = idx('price');
       const idxFormat = idx('format');
       const idxLabel = idx('label');
       const idxNote = idx('note');
@@ -217,8 +241,6 @@
         const artist = idxArtist !== -1 ? (parts[idxArtist] || '').trim() : '';
         const album = idxAlbum !== -1 ? (parts[idxAlbum] || '').trim() : '';
         const year = idxYear !== -1 ? parseInt((parts[idxYear]||'').trim(), 10) || null : null;
-        const priceRaw = idxPrice !== -1 ? (parts[idxPrice] || '').trim() : '';
-        const price = parsePrice(priceRaw);
         const format = idxFormat !== -1 ? (parts[idxFormat] || '').trim() : '';
         const label = idxLabel !== -1 ? (parts[idxLabel] || '').trim() : '';
         const note = idxNote !== -1 ? (parts[idxNote] || '').trim() : '';
@@ -226,17 +248,11 @@
         const genres = splitGenres(gRaw);
         genres.forEach(g => genreCounter.set(g, (genreCounter.get(g) || 0) + 1));
         const available = interpretCNO(cnoRaw);
-        items.push({ url: path, name, title: titleRaw.trim(), available, genres, artist, album, year, price, priceRaw, format, label, note });
+        items.push({ url: path, name, title: titleRaw.trim(), available, genres, artist, album, year, format, label, note });
       }
 
       state.allGenres = genreCounter;
       return items;
-    }
-
-    function parsePrice(s){
-      if (!s) return null;
-      const m = s.replace(/€/g,'').replace(/\s/g,'').replace(',', '.').match(/-?\d+(?:\.\d+)?/);
-      return m ? parseFloat(m[0]) : null;
     }
 
     function interpretCNO(val) {
@@ -285,12 +301,16 @@
       return bits.length ? `<p class="text-xs text-neutral-600 truncate" title="${[...bits, minor.join(' · ')].filter(Boolean).join(' – ')}">${bits.join(' – ')}${line2}</p>` : '';
     }
 
-    function priceBadge(it){
-      if (it.price != null || it.priceRaw) {
-        const txt = it.price != null ? `€ ${it.price.toFixed(2)}` : it.priceRaw;
-        return `<span class="ml-auto text-xs px-2 py-1 rounded-md bg-neutral-100 ring-1 ring-neutral-200">${txt}</span>`;
-      }
-      return '';
+    function qtyControlHTML(url){
+      const val = getQty(url);
+      return `
+        <label class="ml-auto inline-flex items-center gap-2 text-[11px] text-neutral-700">
+          Qty
+          <input type="number" min="0" step="1" inputmode="numeric"
+            data-qty="${url}"
+            value="${val}"
+            class="w-16 px-2 py-1 text-sm border border-neutral-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-black/10">
+        </label>`;
     }
 
     function icon(name){
@@ -320,7 +340,7 @@
                 ${metaRow(it)}
                 ${it.genres?.length ? `<p class='text-[11px] text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
               </div>
-              ${priceBadge(it)}
+              ${qtyControlHTML(it.url)}
             </div>
             <div class="mt-3 flex items-center gap-2">
               <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" target="_blank" aria-label="Apri in nuova scheda">${icon('open')}</a>
@@ -340,13 +360,13 @@
           <div class="min-w-0 grow">
             <div class="flex items-center gap-2">
               <h3 class="text-sm font-medium truncate" title="${it.title}">${it.title}</h3>
-              ${priceBadge(it)}
               ${badgeHTML(it.available)}
             </div>
             ${metaRow(it)}
             ${it.genres?.length ? `<p class='text-[11px] text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
           </div>
           <div class="flex items-center gap-2">
+            ${qtyControlHTML(it.url)}
             <input type="checkbox" data-select="${it.url}" class="w-4 h-4 rounded border-neutral-300 bg-white" ${checked}>
             <button class="p-2 rounded-lg ring-1 ring-neutral-200 bg-white hover:bg-neutral-50" data-fav="${it.url}">${star(isFav)}</button>
             <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" target="_blank">${icon('open')}</a>
@@ -370,8 +390,6 @@
       if (by === 'title-asc') out.sort((a,b)=>a.title.localeCompare(b.title));
       else if (by === 'title-desc') out.sort((a,b)=>b.title.localeCompare(a.title));
       else if (by === 'avail') out.sort((a,b)=> (b.available===a.available) ? a.title.localeCompare(b.title) : (b.available - a.available));
-      else if (by === 'price-asc') out.sort((a,b)=> (a.price??Infinity) - (b.price??Infinity));
-      else if (by === 'price-desc') out.sort((a,b)=> (b.price??-Infinity) - (a.price??-Infinity));
       else if (by === 'year-asc') out.sort((a,b)=> (a.year??Infinity) - (b.year??Infinity));
       else if (by === 'year-desc') out.sort((a,b)=> (b.year??-Infinity) - (a.year??-Infinity));
       return out;
@@ -413,6 +431,10 @@
           const url = e.currentTarget.getAttribute('data-select');
           if (e.currentTarget.checked) state.selection.add(url); else state.selection.delete(url);
           updateSelectionCount();
+        });
+        node.querySelector('[data-qty]')?.addEventListener('input', (e)=>{
+          const url = e.currentTarget.getAttribute('data-qty');
+          setQty(url, e.currentTarget.value);
         });
         frag.appendChild(node);
       });
@@ -487,9 +509,25 @@
     }
 
     function downloadCSVFromItems(items){
-      const header = ['path','title','CNO','genere','artist','album','year','price','format','label','note'];
-      const rows = items.map(it => [it.url, it.title, it.available?'1':'0', it.genres.join('; '), it.artist||'', it.album||'', it.year||'', it.priceRaw||it.price||'', it.format||'', it.label||'', it.note||'']);
-      const csv = [header.join(','), ...rows.map(r=>r.map(s => (s?.toString().includes(',')?`"${s}"`:s)).join(','))].join('\n');
+      // NOTE: price removed; qty added
+      const header = ['path','title','CNO','genere','artist','album','year','qty','format','label','note'];
+      const rows = items.map(it => [
+        it.url,
+        it.title,
+        it.available ? '1' : '0',
+        (it.genres||[]).join('; '),
+        it.artist||'',
+        it.album||'',
+        it.year||'',
+        getQty(it.url),
+        it.format||'',
+        it.label||'',
+        it.note||''
+      ]);
+      const csv = [header.join(','), ...rows.map(r=>r.map(s => {
+        const str = (s ?? '').toString();
+        return (str.includes(',') || str.includes('"') || str.includes('\n')) ? `"${str.replace(/"/g,'""')}"` : str;
+      }).join(','))].join('\n');
       const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -552,7 +590,6 @@
 
     // ===== Init =====
     (async function init(){
-      // CSV
       const csv = await loadCSVText();
       state.items = csv ? parseCSVSmart(csv) : [];
       buildGenreChips();
@@ -610,6 +647,7 @@
       document.getElementById('copyLinks').addEventListener('click', ()=>{ const urls = [...state.selection.size?state.selection:applyFilters(state.items).map(it=>it.url)]; copyList(urls); });
       document.getElementById('copyFilenames').addEventListener('click', ()=>{ const list = [...(state.selection.size?state.selection:applyFilters(state.items).map(it=>it.url))].map(u=>u.split('/').pop()); copyList(list); });
       document.getElementById('downloadCSV').addEventListener('click', ()=>{ const items = state.selection.size? state.items.filter(it=>state.selection.has(it.url)) : applyFilters(state.items); downloadCSVFromItems(items); });
+
       document.getElementById('toggleFavs').addEventListener('click', (e)=>{ state.favoritesOnly = !state.favoritesOnly; e.currentTarget.classList.toggle('bg-black', state.favoritesOnly); e.currentTarget.classList.toggle('text-white', state.favoritesOnly); state.page=1; renderAll(); });
 
       // keyboard shortcuts
