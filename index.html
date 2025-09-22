@@ -3,63 +3,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Inventario – Galleria 8‑bit</title>
+  <title>Inventario – Galleria Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Pixel font (fallback a system font se non carica) -->
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --ink:#111827; /* quasi nero */
-      --paper:#f7f7f2; /* carta */
-      --accent:#00c2a8; /* verde acqua retrò */
-      --accent-2:#ff3b30; /* rosso */
-      --accent-3:#ffd400; /* giallo */
-    }
-    body{ background: var(--paper); }
-    /* Leggera griglia di sfondo a scacchi per feeling retro */
-    body::before{
-      content:""; position:fixed; inset:0; pointer-events:none; opacity:.25;
-      background-image: linear-gradient(to right, rgba(0,0,0,.06) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(0,0,0,.06) 1px, transparent 1px);
-      background-size: 16px 16px;
-    }
-    .pixel-font{ font-family: 'Press Start 2P', ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .5px; }
-    /* Bottoni/chips pixel */
-    .pixel-btn, .pixel-chip, .pixel-input, .pixel-select{
-      border:4px solid var(--ink); border-radius:0 !important; background:#fff; box-shadow: 4px 4px 0 var(--ink);
-    }
-    .pixel-btn:active{ transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
-    .pixel-chip-active{ background: var(--ink) !important; color:#fff !important; }
-    /* Card pixel */
-    .pixel-card{ border:4px solid var(--ink); border-radius:0 !important; box-shadow: 6px 6px 0 var(--ink); }
-    .pixel-row{ border:4px solid var(--ink); border-radius:0 !important; box-shadow: 6px 6px 0 var(--ink); }
-    .pixel-badge{ border:3px solid var(--ink); border-radius:0; box-shadow: 3px 3px 0 var(--ink); }
-    /* Loader 8-bit: quadrato lampeggiante a step */
-    .pixel-loader{ width:64px; height:64px; background:var(--ink); box-shadow: 6px 6px 0 var(--ink); animation: blink 1s steps(2,end) infinite; }
-    @keyframes blink{ 50%{ background:transparent; outline:6px solid var(--ink); } }
-    /* Inputs */
-    #controls input[type="search"].pixel-input{ padding:10px 12px; }
-    /* Chips wrap scorrevole */
-    #genreChipsWrap{ scrollbar-width:thin; }
-    #genreChipsWrap::-webkit-scrollbar{ height:10px; }
-    #genreChipsWrap::-webkit-scrollbar-thumb{ background:var(--ink); }
-    /* Icon buttons */
-    .pixel-icon-btn{ border:3px solid var(--ink); border-radius:0; background:#fff; box-shadow:3px 3px 0 var(--ink); }
-    .pixel-icon-btn:active{ transform: translate(1px,1px); box-shadow:2px 2px 0 var(--ink); }
-    /* Placeholder immagine se rotta: già inline SVG dalla logica */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 56px; height: 56px; border: 5px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: spin .9s linear infinite; }
   </style>
 </head>
-<body class="min-h-screen text-neutral-900">
+<body class="min-h-screen bg-neutral-100 text-neutral-900">
   <!-- Header -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b-4" style="border-color:var(--ink)">
+  <header class="sticky top-0 z-40 bg-gradient-to-b from-white to-white/70 backdrop-blur border-b border-neutral-200/70">
     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-3">
-      <div class="w-10 h-10 grid place-items-center bg-[var(--ink)] text-white pixel-font text-xs" style="box-shadow:4px 4px 0 var(--ink);">IV</div>
+      <div class="w-9 h-9 rounded-xl bg-black text-white grid place-items-center shadow-sm select-none">IV</div>
       <div class="grow min-w-0">
-        <h1 class="pixel-font text-base leading-tight truncate">Inventario 8‑bit</h1>
-        <p class="text-[10px] text-neutral-600 truncate">CSV: <code>path,title,CNO,genere,[artist,album,year,price,format,label,note]</code></p>
+        <h1 class="text-xl font-semibold tracking-tight truncate">Inventario</h1>
+        <p class="text-xs text-neutral-500 truncate">CSV: <code>path,title,CNO,genere,[artist,album,year,price,format,label,note]</code></p>
       </div>
       <div class="hidden sm:flex items-center gap-2">
-        <a href="Image/" class="pixel-btn text-xs px-2 py-1" target="_blank" rel="noopener">Apri cartella</a>
+        <a href="Image/" class="text-sm underline decoration-dotted" target="_blank" rel="noopener">Apri cartella</a>
       </div>
     </div>
   </header>
@@ -67,16 +28,16 @@
   <main class="max-w-7xl mx-auto px-4 py-6">
     <!-- Controls -->
     <section id="controls" class="mb-4">
-      <div class="bg-white p-3 md:p-4 pixel-card">
+      <div class="bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200/70 p-3 md:p-4">
         <div class="flex flex-col gap-3">
           <div class="flex flex-col md:flex-row md:items-center gap-3">
             <div class="relative md:grow">
-              <input id="search" type="search" placeholder="Cerca titolo/artist… (/)" class="pixel-input w-full md:w-auto md:min-w-[340px] pl-10" />
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-700"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79L20 21.5 21.5 20l-6-6ZM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"/></svg>
+              <input id="search" type="search" placeholder="Cerca titolo, artista o file… (/)" class="w-full md:w-auto md:min-w-[340px] bg-neutral-50 border border-neutral-300 rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/10" />
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79L20 21.5 21.5 20l-6-6ZM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"/></svg>
             </div>
             <div class="flex flex-wrap items-center gap-3">
-              <label class="pixel-font text-[10px]">Ordina</label>
-              <select id="sort" class="pixel-select px-3 py-2 bg-white">
+              <label class="text-sm text-neutral-700">Ordina</label>
+              <select id="sort" class="border border-neutral-300 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black/10">
                 <option value="title-asc">Titolo A→Z</option>
                 <option value="title-desc">Titolo Z→A</option>
                 <option value="avail">Disponibili prima</option>
@@ -86,69 +47,68 @@
                 <option value="year-asc">Anno ↑</option>
               </select>
               <div class="flex items-center gap-2">
-                <span class="pixel-font text-[10px]">Solo disp.</span>
-                <button id="toggleAvail" type="button" class="pixel-btn relative inline-flex h-8 w-14 items-center justify-between px-1">
-                  <span class="pixel-font text-[10px]">OFF</span>
-                  <span id="knob" class="w-6 h-6 bg-[var(--accent)]" style="border:3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink);"></span>
+                <span class="text-sm">Solo disp.</span>
+                <button id="toggleAvail" type="button" class="relative inline-flex h-6 w-10 items-center rounded-full border border-neutral-300 bg-white transition">
+                  <span class="sr-only">Solo disponibili</span>
+                  <span id="knob" class="inline-block h-5 w-5 translate-x-0 rounded-full bg-neutral-400 transition"></span>
                 </button>
               </div>
               <div class="flex items-center gap-2">
-                <button id="viewGrid" class="pixel-btn px-3 py-2">Griglia</button>
-                <button id="viewList" class="pixel-btn px-3 py-2">Lista</button>
+                <button id="viewGrid" class="px-3 py-2 rounded-xl border border-neutral-300 bg-white">Griglia</button>
+                <button id="viewList" class="px-3 py-2 rounded-xl border border-neutral-300 bg-white">Lista</button>
               </div>
               <div class="flex items-center gap-2">
-                <label class="pixel-font text-[10px]">Densità</label>
-                <select id="density" class="pixel-select px-3 py-2 bg-white">
+                <label class="text-sm">Densità</label>
+                <select id="density" class="border border-neutral-300 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black/10">
                   <option value="normal">Normale</option>
                   <option value="compact">Compatta</option>
                   <option value="cozy">Comoda</option>
                 </select>
               </div>
-              <button id="clearFilters" class="pixel-btn px-3 py-2">Reset</button>
+              <button id="clearFilters" class="text-sm underline decoration-dotted">Pulisci</button>
             </div>
           </div>
           <!-- Genres chips -->
           <div id="genreChipsWrap" class="overflow-x-auto">
-            <div id="genreChips" class="flex items-center gap-2 min-h-[42px] pb-1"></div>
+            <div id="genreChips" class="flex items-center gap-2 min-h-[34px] pb-1"></div>
           </div>
 
           <!-- Bulk actions -->
-          <div class="flex flex-wrap items-center gap-2 pt-2 border-t-4" style="border-color:var(--ink)">
-            <span id="selCount" class="pixel-font text-[10px] text-neutral-700">0 selezionati</span>
-            <button id="selectAllPage" class="pixel-btn text-sm px-2 py-1">Seleziona pagina</button>
-            <button id="selectAllFiltered" class="pixel-btn text-sm px-2 py-1">Seleziona filtrati</button>
-            <button id="clearSelection" class="pixel-btn text-sm px-2 py-1">Deseleziona</button>
-            <span class="mx-1 text-neutral-400">|</span>
-            <button id="copyLinks" class="pixel-btn text-sm px-2 py-1">Copia link</button>
-            <button id="copyFilenames" class="pixel-btn text-sm px-2 py-1">Copia nomi</button>
-            <button id="downloadCSV" class="pixel-btn text-sm px-2 py-1">Scarica CSV</button>
-            <span class="mx-1 text-neutral-400">|</span>
-            <button id="toggleFavs" class="pixel-btn text-sm px-2 py-1">Solo ★</button>
+          <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-200">
+            <span id="selCount" class="text-sm text-neutral-600">0 selezionati</span>
+            <button id="selectAllPage" class="text-sm px-2 py-1 rounded-lg ring-1 ring-neutral-300 bg-white">Seleziona pagina</button>
+            <button id="selectAllFiltered" class="text-sm px-2 py-1 rounded-lg ring-1 ring-neutral-300 bg-white">Seleziona tutto (filtrato)</button>
+            <button id="clearSelection" class="text-sm px-2 py-1 rounded-lg ring-1 ring-neutral-300 bg-white">Deseleziona</button>
+            <span class="mx-1 text-neutral-300">|</span>
+            <button id="copyLinks" class="text-sm px-2 py-1 rounded-lg ring-1 ring-neutral-300 bg-white">Copia link</button>
+            <button id="copyFilenames" class="text-sm px-2 py-1 rounded-lg ring-1 ring-neutral-300 bg-white">Copia nomi</button>
+            <button id="downloadCSV" class="text-sm px-2 py-1 rounded-lg ring-1 ring-neutral-300 bg-white">Scarica CSV</button>
+            <span class="mx-1 text-neutral-300">|</span>
+            <button id="toggleFavs" class="text-sm px-2 py-1 rounded-lg ring-1 ring-neutral-300 bg-white">Solo preferiti</button>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Loading overlay -->
-    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-[var(--paper)] z-50" role="status" aria-label="loading">
-      <div class="pixel-loader"></div>
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-neutral-100 z-50" role="status" aria-label="loading">
+      <div class="spinner"></div>
     </div>
 
     <!-- Empty state -->
-    <section id="empty" class="hidden py-16 text-center text-neutral-700">
-      <div class="inline-block pixel-card bg-white px-6 py-6">
-        <p class="pixel-font text-xs">Nessun elemento trovato</p>
-      </div>
+    <section id="empty" class="hidden py-16 text-center text-neutral-500">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 h-12 mx-auto mb-3" fill="currentColor"><path d="M4 6h16v12H4z" opacity=".2"/><path d="M18 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 14H6V6h12v12Z"/></svg>
+      <p>Nessun elemento trovato.</p>
     </section>
 
     <!-- Grid/List -->
-    <section id="gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></section>
+    <section id="gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></section>
 
     <!-- Pagination -->
     <section class="mt-6 flex items-center justify-between text-sm">
       <div class="flex items-center gap-2">
-        <label class="pixel-font text-[10px]">Per pagina</label>
-        <select id="perPage" class="pixel-select px-2 py-1 bg-white">
+        <label>Per pagina</label>
+        <select id="perPage" class="border border-neutral-300 rounded-xl px-2 py-1 bg-white">
           <option>12</option>
           <option>24</option>
           <option>48</option>
@@ -156,28 +116,31 @@
         </select>
       </div>
       <div class="flex items-center gap-2">
-        <button id="prevPage" class="pixel-btn px-2 py-1">Indietro</button>
-        <span id="pageInfo" class="pixel-font text-[10px] text-neutral-700">—</span>
-        <button id="nextPage" class="pixel-btn px-2 py-1">Avanti</button>
+        <button id="prevPage" class="px-2 py-1 rounded-lg ring-1 ring-neutral-300 bg-white">Indietro</button>
+        <span id="pageInfo" class="text-neutral-600">—</span>
+        <button id="nextPage" class="px-2 py-1 rounded-lg ring-1 ring-neutral-300 bg-white">Avanti</button>
       </div>
     </section>
   </main>
 
   <!-- Lightbox -->
   <div id="lightbox" class="fixed inset-0 hidden items-center justify-center bg-black/80 p-4 z-50">
-    <button id="closeLightbox" class="absolute top-4 right-4 pixel-btn bg-white" aria-label="Chiudi">✖</button>
-    <img id="lightboxImg" src="" alt="Anteprima" class="max-h-[90vh] max-w-[90vw] pixel-card"/>
-    <div id="lightboxCaption" class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white px-3 py-2 pixel-card text-xs"></div>
+    <button id="closeLightbox" class="absolute top-4 right-4 bg-white/90 hover:bg-white rounded-full p-2" aria-label="Chiudi">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6" fill="currentColor"><path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.18 12 2.89 5.71 4.3 4.29 10.59 10.6l6.3-6.3 1.41 1.41Z"/></svg>
+    </button>
+    <img id="lightboxImg" src="" alt="Anteprima" class="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl"/>
+    <div id="lightboxCaption" class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 px-3 py-1 rounded-lg text-sm"></div>
   </div>
 
   <script>
     const DEFAULT_DIR = 'Image/';
     const CSV_CANDIDATES = ['images.csv', 'Image/images.csv'];
     const EXTENSIONS = ['jpg','jpeg','png','gif','webp','svg','avif'];
-    const PLACEHOLDER = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='600' height='450'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23111827' font-family='monospace' font-size='16'>NO PREVIEW</text></svg>`)}`;
+    const PLACEHOLDER = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='600' height='450'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-family='sans-serif' font-size='18'>Anteprima non disponibile</text></svg>`)}`;
 
     const state = {
-      items: [],
+      rawItems: [],            // original parsed
+      items: [],               // normalized {url,name,title,available,genres:[], artist, album, year, price, format, label, note}
       selectedGenres: new Set(),
       onlyAvailable: false,
       sort: 'title-asc',
@@ -186,103 +149,218 @@
       perPage: 12,
       page: 1,
       favoritesOnly: false,
-      favorites: new Set(JSON.parse(localStorage.getItem('iv:favs')||'[]')),
-      selection: new Set(),
-      allGenres: new Map(),
+      favorites: new Set(JSON.parse(localStorage.getItem('iv:favs')||'[]')), // key: url
+      selection: new Set(), // selected urls
+      allGenres: new Map(), // genre -> count
     };
 
     // ===== Helpers =====
-    function resolvePath(raw){ const s=(raw||'').trim(); if(!s) return null; if(/^https?:\/\//i.test(s)||s.startsWith('/')) return s; if(s.includes('/')) return s; return DEFAULT_DIR+s; }
-    async function loadCSVText(){ for(const path of CSV_CANDIDATES){ try{ const res=await fetch(path,{cache:'no-store'}); if(!res.ok) continue; return await res.text(); }catch(_){} } return null; }
-    function splitGenres(v){ if(!v) return []; return v.split(/[,;|\/]/).map(s=>s.trim()).filter(Boolean); }
+    function resolvePath(raw) {
+      const s = (raw||'').trim();
+      if (!s) return null;
+      if (/^https?:\/\//i.test(s) || s.startsWith('/')) return s;
+      if (s.includes('/')) return s;
+      return DEFAULT_DIR + s;
+    }
 
-    function parseCSVSmart(text){
-      const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith('#'));
-      if(!lines.length) return [];
+    async function loadCSVText() {
+      for (const path of CSV_CANDIDATES) {
+        try {
+          const res = await fetch(path, { cache: 'no-store' });
+          if (!res.ok) continue;
+          return await res.text();
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    function splitGenres(val) {
+      if (!val) return [];
+      return val.split(/[,;|\/]/).map(s => s.trim()).filter(Boolean);
+    }
+
+    function parseCSVSmart(text) {
+      const lines = text.split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('#'));
+      if (!lines.length) return [];
       const rawHeader = lines[0].split(',');
       const first = rawHeader.map(s=>s.trim().toLowerCase());
-      const hasHeader = first.some(h=>['path','title','cno','genere','artist','album','year','price','format','label','note'].includes(h));
+      const hasHeader = first.includes('path') || first.includes('title') || first.includes('cno') || first.includes('genere') || first.includes('artist') || first.includes('album') || first.includes('year') || first.includes('price') || first.includes('format') || first.includes('label') || first.includes('note');
       const header = hasHeader ? first : ['path','title','cno','genere','artist','album','year','price','format','label','note'];
       const rows = hasHeader ? lines.slice(1) : lines;
-      const idx = name => header.indexOf(name);
-      const idxPath=idx('path'), idxTitle=idx('title'), idxCno=idx('cno');
-      const idxGenre = (idx('genere')!==-1)?idx('genere'):((idx('genre')!==-1)?idx('genre'):idx('genres'));
-      const idxArtist=idx('artist'), idxAlbum=idx('album'), idxYear=idx('year'), idxPrice=idx('price'), idxFormat=idx('format'), idxLabel=idx('label'), idxNote=idx('note');
 
-      const out=[], genreCounter=new Map();
-      for(const raw of rows){
+      const idx = (name) => header.indexOf(name);
+      const idxPath = idx('path');
+      const idxTitle = idx('title');
+      const idxCno = idx('cno');
+      const idxGenre = idx('genere') !== -1 ? idx('genere') : (idx('genre') !== -1 ? idx('genre') : idx('genres'));
+      const idxArtist = idx('artist');
+      const idxAlbum = idx('album');
+      const idxYear = idx('year');
+      const idxPrice = idx('price');
+      const idxFormat = idx('format');
+      const idxLabel = idx('label');
+      const idxNote = idx('note');
+
+      const items = [];
+      const genreCounter = new Map();
+
+      for (const raw of rows) {
         const parts = raw.split(',');
-        const path = resolvePath(parts[idxPath!==-1?idxPath:0]); if(!path) continue;
-        const name = path.split('/').pop(); const isImg = EXTENSIONS.some(ext=>name.toLowerCase().endsWith('.'+ext)); if(!isImg) continue;
-        const titleRaw = parts[idxTitle!==-1?idxTitle:1] || name;
-        const cnoRaw = (parts[idxCno!==-1?idxCno:2]||'').trim();
-        const gRaw = idxGenre!==-1 ? parts[idxGenre] : '';
-        const genres = splitGenres(gRaw); genres.forEach(g => genreCounter.set(g,(genreCounter.get(g)||0)+1));
-        const artist = idxArtist!==-1 ? (parts[idxArtist]||'').trim() : '';
-        const album  = idxAlbum !==-1 ? (parts[idxAlbum] ||'').trim() : '';
-        const year   = idxYear  !==-1 ? (parseInt((parts[idxYear]||'').trim(),10)||null) : null;
-        const priceRaw = idxPrice!==-1 ? (parts[idxPrice]||'').trim() : '';
-        const price = priceRaw? parseFloat(priceRaw.replace('€','').replace(',','.')) : null;
-        const format = idxFormat!==-1 ? (parts[idxFormat]||'').trim() : '';
-        const label  = idxLabel !==-1 ? (parts[idxLabel] ||'').trim() : '';
-        const note   = idxNote  !==-1 ? (parts[idxNote]  ||'').trim() : '';
+        const path = resolvePath(parts[idxPath !== -1 ? idxPath : 0]);
+        if (!path) continue;
+        const name = path.split('/').pop();
+        const isImg = EXTENSIONS.some(ext => name.toLowerCase().endsWith('.'+ext));
+        if (!isImg) continue;
+        const titleRaw = parts[idxTitle !== -1 ? idxTitle : 1] || name;
+        const cnoRaw = (parts[idxCno !== -1 ? idxCno : 2] || '').trim();
+        const gRaw = idxGenre !== -1 ? parts[idxGenre] : '';
+        const artist = idxArtist !== -1 ? (parts[idxArtist] || '').trim() : '';
+        const album = idxAlbum !== -1 ? (parts[idxAlbum] || '').trim() : '';
+        const year = idxYear !== -1 ? parseInt((parts[idxYear]||'').trim(), 10) || null : null;
+        const priceRaw = idxPrice !== -1 ? (parts[idxPrice] || '').trim() : '';
+        const price = parsePrice(priceRaw);
+        const format = idxFormat !== -1 ? (parts[idxFormat] || '').trim() : '';
+        const label = idxLabel !== -1 ? (parts[idxLabel] || '').trim() : '';
+        const note = idxNote !== -1 ? (parts[idxNote] || '').trim() : '';
+
+        const genres = splitGenres(gRaw);
+        genres.forEach(g => genreCounter.set(g, (genreCounter.get(g) || 0) + 1));
         const available = interpretCNO(cnoRaw);
-        out.push({ url:path, name, title:titleRaw.trim(), available, genres, artist, album, year, price, priceRaw, format, label, note });
+        items.push({ url: path, name, title: titleRaw.trim(), available, genres, artist, album, year, price, priceRaw, format, label, note });
       }
-      state.allGenres = genreCounter; return out;
+
+      state.allGenres = genreCounter;
+      return items;
     }
 
-    function interpretCNO(val){ if(!val) return true; const v=val.toString().trim().toLowerCase(); const t=['1','y','yes','true','ok','available','disponibile','si','sì']; const f=['0','n','no','false','unavailable','non disponibile','nd','soldout','esaurito']; if(t.includes(v)) return true; if(f.includes(v)) return false; if(!Number.isNaN(Number(v))) return Number(v)!==0; return true; }
-
-    // ===== UI helpers =====
-    function badgeHTML(ok){
-      return ok
-        ? `<span class="pixel-badge absolute left-3 top-3 text-[11px] px-2 py-1 bg-[var(--accent)] text-white">DISP</span>`
-        : `<span class="pixel-badge absolute left-3 top-3 text-[11px] px-2 py-1 bg-[var(--accent-2)] text-white">NO</span>`;
+    function parsePrice(s){
+      if (!s) return null;
+      const m = s.replace(/€/g,'').replace(/\s/g,'').replace(',', '.').match(/-?\d+(?:\.\d+)?/);
+      return m ? parseFloat(m[0]) : null;
     }
-    function favBtnHTML(isFav,url){ return `<button class="pixel-icon-btn p-2 bg-white" data-fav="${url}" aria-label="Preferito">${star(isFav)}</button>`; }
-    function star(active){ return active? '★':'☆'; }
-    function genreTags(genres){ if(!genres||!genres.length) return ''; return `<div class="mt-2 flex flex-wrap gap-1">${genres.map(g=>`<span class='pixel-chip text-[10px] px-2 py-1 bg-white'>${g}</span>`).join('')}</div>`; }
-    function priceBadge(it){ if(it.price!=null || it.priceRaw){ const txt = it.price!=null?`€ ${it.price.toFixed(2)}`:it.priceRaw; return `<span class="pixel-chip text-[10px] ml-auto bg-[var(--accent-3)]">${txt}</span>`} return ''; }
+
+    function interpretCNO(val) {
+      if (!val) return true;
+      const v = val.toString().trim().toLowerCase();
+      const truthy = ['1','y','yes','true','ok','available','disponibile','si','sì'];
+      const falsy  = ['0','n','no','false','unavailable','non disponibile','nd','soldout','esaurito'];
+      if (truthy.includes(v)) return true;
+      if (falsy.includes(v)) return false;
+      if (!Number.isNaN(Number(v))) return Number(v) !== 0;
+      return true;
+    }
+
+    // ===== UI builders =====
+    function badgeHTML(isAvailable) {
+      const base = 'absolute left-3 top-3 text-[11px] font-medium px-2.5 py-1 rounded-md shadow backdrop-blur';
+      return isAvailable
+        ? `<span class="${base} bg-emerald-600 text-white">Disponibile</span>`
+        : `<span class="${base} bg-red-600 text-white">Non disponibile</span>`;
+    }
+
+    function favBtnHTML(isFav, url){
+      return `<button class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" data-fav="${url}" aria-label="Preferito">${isFav?star(true):star(false)}</button>`;
+    }
+
+    function star(active){
+      return active
+        ? `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='w-4 h-4' fill='currentColor'><path d='M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21 12 17.27Z'/></svg>`
+        : `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='w-4 h-4' fill='currentColor'><path d='M22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24l5.46 4.72L5.82 21 12 17.27 18.18 21l-1.63-7.04L22 9.24ZM12 15.4 8.24 17.67l.99-4.28L6.5 10.5l4.38-.38L12 6l1.12 4.12 4.38.38-2.73 2.89.99 4.28L12 15.4Z'/></svg>`
+    }
+
     function metaBlock(it){
-      const artistLine = it.artist? `<p class="text-[11px] text-neutral-800 truncate" title="${it.artist}">${it.artist}</p>`:'';
-      const albumLine  = it.album ? `<p class="text-[11px] italic text-neutral-900 truncate" title="${it.album}">“${it.album}”</p>`:'';
-      const minor=[]; if(it.year) minor.push(it.year); if(it.format) minor.push(it.format); if(it.label) minor.push(it.label);
-      const minorLine = minor.length? `<p class="text-[10px] text-neutral-600 truncate">${minor.join(' · ')}</p>`:'';
-      return artistLine+albumLine+minorLine;
+      const artistLine = it.artist ? `<p class="text-xs text-neutral-700 truncate" title="${it.artist}">${it.artist}</p>` : '';
+      const albumLine  = it.album  ? `<p class="text-xs italic text-neutral-800 truncate" title="${it.album}">“${it.album}”</p>` : '';
+      const minor = [];
+      if (it.year) minor.push(it.year);
+      if (it.format) minor.push(it.format);
+      if (it.label) minor.push(it.label);
+      const minorLine = minor.length ? `<p class="text-[11px] text-neutral-500 truncate">${minor.join(' · ')}</p>` : '';
+      return artistLine + albumLine + minorLine;
     }
 
-    function iconBtn(name,url){
-      const map={ open:`Apri`, download:`Scarica`, copy:`Copia` };
-      const label=map[name]||name; const attrs = name==='download'?`href="${url}" download`:`data-${name}="${url}"`;
-      return `<a class="pixel-icon-btn p-2" ${attrs} ${name==='open'?`href='${url}' target='_blank'`:''}>${label}</a>`;
+    function genreTags(genres) {
+      if (!genres || !genres.length) return '';
+      return `<div class="mt-2 flex flex-wrap gap-1">${genres.map(g=>`<span class='text-[11px] px-2 py-0.5 rounded-full border border-neutral-300 bg-neutral-50'>${g}</span>`).join('')}</div>`;
+    }
+
+    function metaBlock(it){
+      const bits = [];
+      if (it.artist) bits.push(it.artist);
+      if (it.album) bits.push(`“${it.album}”`);
+      const minor = [];
+      if (it.year) minor.push(it.year);
+      if (it.format) minor.push(it.format);
+      if (it.label) minor.push(it.label);
+      const line2 = minor.length ? ` · ${minor.join(' · ')}` : '';
+      return bits.length ? `<p class="text-xs text-neutral-600 truncate" title="${[...bits, minor.join(' · ')].filter(Boolean).join(' – ')}">${bits.join(' – ')}${line2}</p>` : '';
+    }
+
+    function priceBadge(it){
+      if (it.price != null || it.priceRaw) {
+        const txt = it.price != null ? `€ ${it.price.toFixed(2)}` : it.priceRaw;
+        return `<span class="ml-auto text-xs px-2 py-1 rounded-md bg-neutral-100 ring-1 ring-neutral-200">${txt}</span>`;
+      }
+      return '';
+    }
+
+    function icon(name){
+      const icons = {
+        open: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='w-4 h-4' fill='currentColor'><path d='M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3Z'/><path d='M5 5h6v2H7v10h10v-4h2v6H5V5Z'/></svg>`,
+        download: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='w-4 h-4' fill='currentColor'><path d='M5 20h14v-2H5v2ZM19 9h-4V3H9v6H5l7 7 7-7Z'/></svg>`,
+        copy: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='w-4 h-4' fill='currentColor'><path d='M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1Zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H8V7h11v14Z'/></svg>`
+      };
+      return icons[name] || '';
     }
 
     function cardHTML(it){
       const isFav = state.favorites.has(it.url);
       const checked = state.selection.has(it.url) ? 'checked' : '';
       return `
-        <article class="group pixel-card bg-white overflow-hidden">
+        <article class="group bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200/70 overflow-hidden transition transform hover:-translate-y-[2px]">
           <div class="relative ${state.density==='compact' ? 'aspect-[4/3]' : 'aspect-[16/10]'} bg-neutral-100 overflow-hidden">
             ${badgeHTML(it.available)}
-            <input type="checkbox" data-select="${it.url}" class="absolute left-3 bottom-3 w-5 h-5" ${checked}>
-            <button class="absolute right-3 top-3 pixel-icon-btn p-2 bg-white" data-fav="${it.url}">${star(isFav)}</button>
-            <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available?'':'opacity-60'}" onerror="this.onerror=null;this.src='${PLACEHOLDER}';"/>
-            <div class="absolute right-3 bottom-3 flex flex-wrap gap-1">${it.year?`<span class='pixel-chip text-[10px] bg-white'>${it.year}</span>`:''}${it.format?`<span class='pixel-chip text-[10px] bg-white'>${it.format}</span>`:''}</div>
+            <button class="absolute right-3 top-3 p-2 rounded-lg ring-1 ring-neutral-200 bg-white/90 hover:bg-white" data-fav="${it.url}">${star(isFav)}</button>
+            <input type="checkbox" data-select="${it.url}" class="absolute left-3 bottom-3 w-4 h-4 rounded border-neutral-300 bg-white" ${checked}>
+            <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available ? '' : 'opacity-60'} group-hover:scale-[1.01] transition-transform" onerror="this.onerror=null;this.src='${PLACEHOLDER}';"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-black/0 to-transparent pointer-events-none"></div>
+            <div class="absolute right-3 bottom-3 flex flex-wrap gap-1">${it.year?`<span class='text-[10px] px-1.5 py-0.5 rounded-md bg-black/60 text-white backdrop-blur'>${it.year}</span>`:''}${it.format?`<span class='text-[10px] px-1.5 py-0.5 rounded-md bg-black/60 text-white backdrop-blur'>${it.format}</span>`:''}</div>
           </div>
           <div class="p-4">
             <div class="flex items-start gap-3">
               <div class="min-w-0 grow">
-                <h3 class="pixel-font text-[12px] leading-snug truncate" title="${it.title}">${it.title}</h3>
+                <h3 class="text-sm font-medium truncate" title="${it.title}">${it.title}</h3>
                 ${metaBlock(it)}
-                ${it.genres?.length ? `<div class='mt-2'>${genreTags(it.genres)}</div>` : ''}
+                ${it.genres?.length ? `<p class='text-[11px] text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
               </div>
               ${priceBadge(it)}
             </div>
             <div class="mt-3 flex items-center gap-2">
-              ${iconBtn('open',it.url)}
-              ${iconBtn('download',it.url)}
-              <button class="pixel-icon-btn p-2" data-copy="${it.url}" aria-label="Copia link">Copia</button>
+              <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" target="_blank" aria-label="Apri in nuova scheda">${icon('open')}</a>
+              <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" download aria-label="Scarica">${icon('download')}</a>
+              <button class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" data-copy="${it.url}" aria-label="Copia link">${icon('copy')}</button>
+            </div>
+          </div>
+        </article>`;
+    } bg-neutral-100 overflow-hidden">
+            ${badgeHTML(it.available)}
+            <input type="checkbox" data-select="${it.url}" class="absolute left-3 bottom-3 w-4 h-4 rounded border-neutral-300 bg-white" ${checked}>
+            <button class="absolute right-3 top-3 p-2 rounded-lg ring-1 ring-neutral-200 bg-white/90 hover:bg-white" data-fav="${it.url}">${star(isFav)}</button>
+            <img src="${it.url}" alt="${it.title}" loading="lazy" class="w-full h-full object-cover ${it.available ? '' : 'opacity-60'} group-hover:scale-[1.01] transition-transform" onerror="this.onerror=null;this.src='${PLACEHOLDER}';"/>
+          </div>
+          <div class="p-4">
+            <div class="flex items-start gap-3">
+              <div class="min-w-0 grow">
+                <h3 class="text-sm font-medium truncate" title="${it.title}">${it.title}</h3>
+                ${metaBlock(it)}
+                ${it.genres?.length ? `<p class='text-[11px] text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
+              </div>
+              ${priceBadge(it)}
+            </div>
+            <div class="mt-3 flex items-center gap-2">
+              <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" target="_blank" aria-label="Apri in nuova scheda">${icon('open')}</a>
+              <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" download aria-label="Scarica">${icon('download')}</a>
+              <button class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" data-copy="${it.url}" aria-label="Copia link">${icon('copy')}</button>
             </div>
           </div>
         </article>`;
@@ -292,133 +370,298 @@
       const isFav = state.favorites.has(it.url);
       const checked = state.selection.has(it.url) ? 'checked' : '';
       return `
-        <div class="pixel-row bg-white p-3 flex items-center gap-3">
-          <img src="${it.url}" alt="${it.title}" class="w-28 h-20 object-cover" onerror="this.onerror=null;this.src='${PLACEHOLDER}';">
+        <div class="bg-white rounded-xl shadow-sm ring-1 ring-neutral-200/70 p-3 flex items-center gap-3">
+          <img src="${it.url}" alt="${it.title}" class="w-24 h-16 object-cover rounded-lg ring-1 ring-neutral-200" onerror="this.onerror=null;this.src='${PLACEHOLDER}';">
           <div class="min-w-0 grow">
             <div class="flex items-center gap-2">
-              <h3 class="pixel-font text-[12px] leading-snug truncate" title="${it.title}">${it.title}</h3>
+              <h3 class="text-sm font-medium truncate" title="${it.title}">${it.title}</h3>
               ${priceBadge(it)}
               ${badgeHTML(it.available)}
             </div>
             ${metaBlock(it)}
-            ${it.genres?.length ? `<div class='mt-1'>${genreTags(it.genres)}</div>` : ''}
+            ${it.genres?.length ? `<p class='text-[11px] text-neutral-500 truncate mt-1'>${it.genres.join(' · ')}</p>` : ''}
           </div>
           <div class="flex items-center gap-2">
-            <input type="checkbox" data-select="${it.url}" class="w-5 h-5" ${checked}>
-            <button class="pixel-icon-btn p-2 bg-white" data-fav="${it.url}">${star(isFav)}</button>
-            ${iconBtn('open',it.url)}
-            ${iconBtn('download',it.url)}
-            <button class="pixel-icon-btn p-2" data-copy="${it.url}">Copia</button>
+            <input type="checkbox" data-select="${it.url}" class="w-4 h-4 rounded border-neutral-300 bg-white" ${checked}>
+            <button class="p-2 rounded-lg ring-1 ring-neutral-200 bg-white hover:bg-neutral-50" data-fav="${it.url}">${star(isFav)}</button>
+            <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" target="_blank">${icon('open')}</a>
+            <a class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" href="${it.url}" download>${icon('download')}</a>
+            <button class="p-2 rounded-lg ring-1 ring-neutral-200 hover:bg-neutral-50" data-copy="${it.url}">${icon('copy')}</button>
           </div>
         </div>`;
     }
 
-    // ===== Filters, pagination, render =====
+    // ===== Render & pagination =====
     function applyFilters(base){
       let out = base;
-      const q=document.getElementById('search').value.trim().toLowerCase();
-      if(q) out = out.filter(it => `${it.title} ${it.name} ${it.artist} ${it.album}`.toLowerCase().includes(q));
-      if(state.onlyAvailable) out = out.filter(it=>it.available);
-      if(state.selectedGenres.size) out = out.filter(it=> it.genres?.some(g=>state.selectedGenres.has(g)) );
-      if(state.favoritesOnly) out = out.filter(it=> state.favorites.has(it.url));
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      if (q) out = out.filter(it => `${it.title} ${it.name} ${it.artist} ${it.album}`.toLowerCase().includes(q));
+      if (state.onlyAvailable) out = out.filter(it => it.available);
+      if (state.selectedGenres.size) out = out.filter(it => it.genres?.some(g => state.selectedGenres.has(g)));
+      if (state.favoritesOnly) out = out.filter(it => state.favorites.has(it.url));
       // sort
-      const by=state.sort; out=out.slice();
-      if(by==='title-asc') out.sort((a,b)=>a.title.localeCompare(b.title));
-      else if(by==='title-desc') out.sort((a,b)=>b.title.localeCompare(a.title));
-      else if(by==='avail') out.sort((a,b)=> (b.available===a.available)? a.title.localeCompare(b.title) : (b.available - a.available));
-      else if(by==='price-asc') out.sort((a,b)=> (a.price??Infinity) - (b.price??Infinity));
-      else if(by==='price-desc') out.sort((a,b)=> (b.price??-Infinity) - (a.price??-Infinity));
-      else if(by==='year-asc') out.sort((a,b)=> (a.year??Infinity) - (b.year??Infinity));
-      else if(by==='year-desc') out.sort((a,b)=> (b.year??-Infinity) - (a.year??-Infinity));
+      const by = state.sort;
+      out = out.slice();
+      if (by === 'title-asc') out.sort((a,b)=>a.title.localeCompare(b.title));
+      else if (by === 'title-desc') out.sort((a,b)=>b.title.localeCompare(a.title));
+      else if (by === 'avail') out.sort((a,b)=> (b.available===a.available) ? a.title.localeCompare(b.title) : (b.available - a.available));
+      else if (by === 'price-asc') out.sort((a,b)=> (a.price??Infinity) - (b.price??Infinity));
+      else if (by === 'price-desc') out.sort((a,b)=> (b.price??-Infinity) - (a.price??-Infinity));
+      else if (by === 'year-asc') out.sort((a,b)=> (a.year??Infinity) - (b.year??Infinity));
+      else if (by === 'year-desc') out.sort((a,b)=> (b.year??-Infinity) - (a.year??-Infinity));
       return out;
     }
 
-    function colsClass(){ if(state.density==='compact') return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'; if(state.density==='cozy') return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'; return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'; }
-
     function renderAll(){
-      const grid=document.getElementById('gallery');
-      grid.className = state.view==='grid' ? `grid ${colsClass()} gap-6` : 'flex flex-col gap-3';
-      const empty=document.getElementById('empty');
-      const items=applyFilters(state.items);
-      const per = state.perPage===-1 ? items.length : state.perPage;
-      const totalPages = Math.max(1, Math.ceil(items.length / (per||1)));
-      if(state.page>totalPages) state.page=totalPages;
-      const start=(state.page-1)*per; const visible = per===items.length ? items : items.slice(start,start+per);
-      empty.classList.toggle('hidden', items.length!==0);
-      grid.innerHTML=''; const frag=document.createDocumentFragment();
-      visible.forEach(it=>{ const wrap=document.createElement('div'); wrap.innerHTML = state.view==='grid'? cardHTML(it): rowHTML(it); const node=wrap.firstElementChild;
-        node.querySelector('img').addEventListener('click',()=>openLightbox(it));
-        node.querySelector('[data-copy]')?.addEventListener('click', async (e)=>{ try{ await navigator.clipboard.writeText(e.currentTarget.getAttribute('data-copy')); toast('Link copiato'); }catch(_){} });
-        node.querySelector('[data-fav]')?.addEventListener('click',(e)=>{ const url=e.currentTarget.getAttribute('data-fav'); if(state.favorites.has(url)) state.favorites.delete(url); else state.favorites.add(url); localStorage.setItem('iv:favs', JSON.stringify([...state.favorites])); renderAll(); });
-        node.querySelector('[data-select]')?.addEventListener('change',(e)=>{ const url=e.currentTarget.getAttribute('data-select'); if(e.currentTarget.checked) state.selection.add(url); else state.selection.delete(url); updateSelectionCount(); });
+      const grid = document.getElementById('gallery');
+      grid.className = state.view==='grid' ? `grid ${colsClass()} gap-5` : 'flex flex-col gap-3';
+      const empty = document.getElementById('empty');
+      const items = applyFilters(state.items);
+
+      // pagination
+      const per = state.perPage === -1 ? items.length : state.perPage;
+      const totalPages = Math.max(1, Math.ceil(items.length / (per || 1)));
+      if (state.page > totalPages) state.page = totalPages;
+      const start = (state.page - 1) * per;
+      const visible = per === items.length ? items : items.slice(start, start + per);
+
+      empty.classList.toggle('hidden', items.length !== 0);
+      grid.innerHTML = '';
+      const frag = document.createDocumentFragment();
+
+      visible.forEach(it => {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = state.view==='grid' ? cardHTML(it) : rowHTML(it);
+        const node = wrapper.firstElementChild;
+        // interactivity
+        node.querySelector('img').addEventListener('click', () => openLightbox(it));
+        node.querySelector('[data-copy]')?.addEventListener('click', async (e)=>{
+          try { await navigator.clipboard.writeText(e.currentTarget.getAttribute('data-copy')); toast('Link copiato'); } catch(_) {}
+        });
+        node.querySelector('[data-fav]')?.addEventListener('click', (e)=>{
+          const url = e.currentTarget.getAttribute('data-fav');
+          if (state.favorites.has(url)) state.favorites.delete(url); else state.favorites.add(url);
+          localStorage.setItem('iv:favs', JSON.stringify([...state.favorites]));
+          renderAll();
+        });
+        node.querySelector('[data-select]')?.addEventListener('change', (e)=>{
+          const url = e.currentTarget.getAttribute('data-select');
+          if (e.currentTarget.checked) state.selection.add(url); else state.selection.delete(url);
+          updateSelectionCount();
+        });
         frag.appendChild(node);
       });
       grid.appendChild(frag);
-      document.getElementById('pageInfo').textContent = items.length? `Pag ${state.page}/${totalPages} • ${items.length}` : '—';
-      document.getElementById('prevPage').disabled = state.page<=1;
-      document.getElementById('nextPage').disabled = state.page>=totalPages;
-      updateSelectionCount(); saveURLState();
+
+      // page info
+      document.getElementById('pageInfo').textContent = items.length ? `Pagina ${state.page} di ${totalPages} • ${items.length} elementi` : '—';
+      document.getElementById('prevPage').disabled = state.page <= 1;
+      document.getElementById('nextPage').disabled = state.page >= totalPages;
+
+      updateSelectionCount();
+      saveURLState();
+    }
+
+    function colsClass(){
+      if (state.density==='compact') return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5';
+      if (state.density==='cozy') return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+      return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
     }
 
     // ===== Genre chips =====
     function buildGenreChips(){
-      const wrap=document.getElementById('genreChips'); wrap.innerHTML='';
-      const entries=Array.from(state.allGenres.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
-      entries.forEach(([g,count])=>{ const active=state.selectedGenres.has(g); const btn=document.createElement('button'); btn.className=`pixel-chip text-sm px-3 py-2 ${active?'pixel-chip-active':''}`; btn.setAttribute('data-genre',g); btn.textContent=`${g} (${count})`; btn.addEventListener('click',()=>{ if(state.selectedGenres.has(g)) state.selectedGenres.delete(g); else state.selectedGenres.add(g); buildGenreChips(); state.page=1; renderAll(); }); wrap.appendChild(btn); });
+      const wrap = document.getElementById('genreChips');
+      wrap.innerHTML = '';
+      const entries = Array.from(state.allGenres.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
+      entries.forEach(([g, count]) => {
+        const active = state.selectedGenres.has(g);
+        const btn = document.createElement('button');
+        btn.className = `px-3 py-1 rounded-full text-sm border ${active ? 'bg-black text-white border-black' : 'bg-white text-neutral-800 border-neutral-300'} hover:bg-neutral-50 whitespace-nowrap`;
+        btn.setAttribute('data-genre', g);
+        btn.textContent = `${g} (${count})`;
+        btn.addEventListener('click', () => {
+          if (state.selectedGenres.has(g)) state.selectedGenres.delete(g); else state.selectedGenres.add(g);
+          buildGenreChips();
+          state.page = 1;
+          renderAll();
+        });
+        wrap.appendChild(btn);
+      });
     }
 
     // ===== Lightbox =====
-    function openLightbox(it){ const lb=document.getElementById('lightbox'); document.getElementById('lightboxImg').src=it.url; document.getElementById('lightboxCaption').textContent=it.title||it.name; lb.classList.remove('hidden'); lb.classList.add('flex'); }
-    function closeLight(){ const lb=document.getElementById('lightbox'); lb.classList.add('hidden'); lb.classList.remove('flex'); document.getElementById('lightboxImg').src=''; }
+    function openLightbox(it) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightboxImg').src = it.url;
+      document.getElementById('lightboxCaption').textContent = it.title || it.name;
+      lb.classList.remove('hidden');
+      lb.classList.add('flex');
+    }
+    function closeLight() {
+      const lb = document.getElementById('lightbox');
+      lb.classList.add('hidden');
+      lb.classList.remove('flex');
+      document.getElementById('lightboxImg').src = '';
+    }
 
-    // ===== Selection & bulk =====
-    function currentVisible(){ const items=applyFilters(state.items); const per=state.perPage===-1?items.length:state.perPage; const start=(state.page-1)*per; return per===items.length?items:items.slice(start,start+per); }
-    function updateSelectionCount(){ document.getElementById('selCount').textContent = `${state.selection.size} selezionati`; }
-    function copyList(list){ if(!list.length) return; navigator.clipboard.writeText(list.join('\n')).then(()=>toast('Copiato')); }
-    function downloadCSVFromItems(items){ const header=['path','title','CNO','genere','artist','album','year','price','format','label','note']; const rows=items.map(it=>[it.url,it.title,it.available?'1':'0',it.genres.join('; '),it.artist||'',it.album||'',it.year||'',it.priceRaw||it.price||'',it.format||'',it.label||'',it.note||'']); const csv=[header.join(','),...rows.map(r=>r.map(s=>(s?.toString().includes(',')?`"${s}"`:s)).join(','))].join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='inventory_filtered.csv'; document.body.appendChild(a); a.click(); a.remove(); }
+    // ===== Selection & bulk actions =====
+    function currentVisible(){
+      const items = applyFilters(state.items);
+      const per = state.perPage === -1 ? items.length : state.perPage;
+      const start = (state.page - 1) * per;
+      return per === items.length ? items : items.slice(start, start + per);
+    }
+
+    function updateSelectionCount(){
+      document.getElementById('selCount').textContent = `${state.selection.size} selezionati`;
+    }
+
+    function copyList(list){
+      if (!list.length) return;
+      navigator.clipboard.writeText(list.join('\n')).then(()=>toast('Copiato negli appunti'));
+    }
+
+    function downloadCSVFromItems(items){
+      const header = ['path','title','CNO','genere','artist','album','year','price','format','label','note'];
+      const rows = items.map(it => [it.url, it.title, it.available?'1':'0', it.genres.join('; '), it.artist||'', it.album||'', it.year||'', it.priceRaw||it.price||'', it.format||'', it.label||'', it.note||'']);
+      const csv = [header.join(','), ...rows.map(r=>r.map(s => (s?.toString().includes(',')?`"${s}"`:s)).join(','))].join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'inventory_filtered.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+    }
 
     // ===== URL state =====
-    function saveURLState(){ const p=new URLSearchParams(); const q=document.getElementById('search').value.trim(); if(q) p.set('q',q); if(state.onlyAvailable) p.set('avail','1'); if(state.favoritesOnly) p.set('fav','1'); if(state.selectedGenres.size) p.set('g',[...state.selectedGenres].join('|')); if(state.sort!=='title-asc') p.set('sort',state.sort); if(state.view!=='grid') p.set('view',state.view); if(state.density!=='normal') p.set('dens',state.density); if(state.perPage!==12) p.set('per',state.perPage); if(state.page!==1) p.set('p',state.page); history.replaceState(null,'',`${location.pathname}?${p.toString()}`); }
-    function loadURLState(){ const p=new URLSearchParams(location.search); const q=p.get('q')||''; document.getElementById('search').value=q; state.onlyAvailable=p.get('avail')==='1'; state.favoritesOnly=p.get('fav')==='1'; (p.get('g')||'').split('|').filter(Boolean).forEach(g=>state.selectedGenres.add(g)); state.sort=p.get('sort')||'title-asc'; document.getElementById('sort').value=state.sort; state.view=p.get('view')||'grid'; state.density=p.get('dens')||'normal'; document.getElementById('density').value=state.density; state.perPage=parseInt(p.get('per')||'12',10); document.getElementById('perPage').value=String(state.perPage); state.page=parseInt(p.get('p')||'1',10); setViewButtons(); reflectAvailToggle(); }
-    function setViewButtons(){ document.getElementById('viewGrid').classList.toggle('pixel-chip-active', state.view==='grid'); document.getElementById('viewList').classList.toggle('pixel-chip-active', state.view==='list'); }
-    function reflectAvailToggle(){ const knob=document.getElementById('knob'); const btn=document.getElementById('toggleAvail'); if(state.onlyAvailable){ knob.style.transform='translateX(28px)'; btn.style.background='var(--accent)'; } else { knob.style.transform='translateX(0)'; btn.style.background='#fff'; } }
+    function saveURLState(){
+      const params = new URLSearchParams();
+      const q = document.getElementById('search').value.trim();
+      if (q) params.set('q', q);
+      if (state.onlyAvailable) params.set('avail','1');
+      if (state.favoritesOnly) params.set('fav','1');
+      if (state.selectedGenres.size) params.set('g', [...state.selectedGenres].join('|'));
+      if (state.sort !== 'title-asc') params.set('sort', state.sort);
+      if (state.view !== 'grid') params.set('view', state.view);
+      if (state.density !== 'normal') params.set('dens', state.density);
+      if (state.perPage !== 12) params.set('per', state.perPage);
+      if (state.page !== 1) params.set('p', state.page);
+      const newUrl = `${location.pathname}?${params.toString()}`;
+      history.replaceState(null, '', newUrl);
+    }
+
+    function loadURLState(){
+      const p = new URLSearchParams(location.search);
+      const q = p.get('q')||''; document.getElementById('search').value = q;
+      state.onlyAvailable = p.get('avail')==='1';
+      state.favoritesOnly = p.get('fav')==='1';
+      const gs = (p.get('g')||'').split('|').filter(Boolean); gs.forEach(g=>state.selectedGenres.add(g));
+      state.sort = p.get('sort')||'title-asc'; document.getElementById('sort').value = state.sort;
+      state.view = p.get('view')||'grid';
+      state.density = p.get('dens')||'normal'; document.getElementById('density').value = state.density;
+      state.perPage = parseInt(p.get('per')||'12', 10); document.getElementById('perPage').value = String(state.perPage);
+      state.page = parseInt(p.get('p')||'1', 10);
+      // reflect toggles
+      document.getElementById('knob').style.transform = state.onlyAvailable ? 'translateX(20px)' : 'translateX(0)';
+      document.getElementById('toggleAvail').classList.toggle('bg-black', state.onlyAvailable);
+      document.getElementById('knob').classList.toggle('bg-white', state.onlyAvailable);
+      document.getElementById('knob').classList.toggle('bg-neutral-400', !state.onlyAvailable);
+      // view buttons
+      setViewButtons();
+    }
+
+    function setViewButtons(){
+      document.getElementById('viewGrid').classList.toggle('bg-black', state.view==='grid');
+      document.getElementById('viewGrid').classList.toggle('text-white', state.view==='grid');
+      document.getElementById('viewList').classList.toggle('bg-black', state.view==='list');
+      document.getElementById('viewList').classList.toggle('text-white', state.view==='list');
+    }
 
     // ===== Toast =====
-    function toast(msg){ const t=document.createElement('div'); t.className='fixed bottom-4 left-1/2 -translate-x-1/2 pixel-card bg-white text-xs px-3 py-2 z-[60]'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 1100); }
+    function toast(msg){
+      const t = document.createElement('div');
+      t.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-black text-white text-sm px-3 py-2 rounded-lg shadow z-[60]';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.remove(); }, 1200);
+    }
 
     // ===== Init =====
     (async function init(){
-      const csv=await loadCSVText();
+      // CSV
+      const csv = await loadCSVText();
       state.items = csv ? parseCSVSmart(csv) : [];
       buildGenreChips();
       loadURLState();
       renderAll();
 
       // Handlers
-      const debounce=(fn,ms=200)=>{ let to; return (...a)=>{ clearTimeout(to); to=setTimeout(()=>fn(...a), ms); } };
-      document.getElementById('search').addEventListener('input', debounce(()=>{ state.page=1; renderAll(); },250));
-      document.getElementById('sort').addEventListener('change', e=>{ state.sort=e.target.value; state.page=1; renderAll(); });
-      document.getElementById('toggleAvail').addEventListener('click', e=>{ state.onlyAvailable=!state.onlyAvailable; reflectAvailToggle(); state.page=1; renderAll(); });
+      const debounce = (fn, ms=200)=>{ let to; return (...a)=>{ clearTimeout(to); to=setTimeout(()=>fn(...a), ms); } };
+      document.getElementById('search').addEventListener('input', debounce(()=>{ state.page=1; renderAll(); }, 250));
+      document.getElementById('sort').addEventListener('change', (e)=>{ state.sort = e.target.value; state.page=1; renderAll(); });
+      document.getElementById('toggleAvail').addEventListener('click', (e)=>{
+        state.onlyAvailable = !state.onlyAvailable;
+        document.getElementById('knob').style.transform = state.onlyAvailable ? 'translateX(20px)' : 'translateX(0)';
+        e.currentTarget.classList.toggle('bg-black', state.onlyAvailable);
+        document.getElementById('knob').classList.toggle('bg-white', state.onlyAvailable);
+        document.getElementById('knob').classList.toggle('bg-neutral-400', !state.onlyAvailable);
+        state.page=1; renderAll();
+      });
       document.getElementById('viewGrid').addEventListener('click', ()=>{ state.view='grid'; setViewButtons(); renderAll(); });
       document.getElementById('viewList').addEventListener('click', ()=>{ state.view='list'; setViewButtons(); renderAll(); });
-      document.getElementById('density').addEventListener('change', e=>{ state.density=e.target.value; renderAll(); });
-      document.getElementById('clearFilters').addEventListener('click', ()=>{ document.getElementById('search').value=''; state.selectedGenres.clear(); state.onlyAvailable=false; state.sort='title-asc'; state.view='grid'; state.density='normal'; state.perPage=12; state.page=1; state.favoritesOnly=false; state.selection.clear(); document.getElementById('sort').value='title-asc'; document.getElementById('density').value='normal'; document.getElementById('perPage').value='12'; setViewButtons(); reflectAvailToggle(); renderAll(); });
-      document.getElementById('perPage').addEventListener('change', e=>{ state.perPage=parseInt(e.target.value,10); state.page=1; renderAll(); });
-      document.getElementById('prevPage').addEventListener('click', ()=>{ if(state.page>1){ state.page--; renderAll(); } });
+      document.getElementById('density').addEventListener('change', (e)=>{ state.density=e.target.value; renderAll(); });
+      document.getElementById('clearFilters').addEventListener('click', ()=>{
+        document.getElementById('search').value = '';
+        state.selectedGenres.clear();
+        state.onlyAvailable = false;
+        state.sort = 'title-asc';
+        state.view = 'grid';
+        state.density = 'normal';
+        state.perPage = 12;
+        state.page = 1;
+        state.favoritesOnly = false;
+        state.selection.clear();
+        document.getElementById('sort').value = 'title-asc';
+        document.getElementById('density').value = 'normal';
+        document.getElementById('perPage').value = '12';
+        setViewButtons();
+        document.getElementById('knob').style.transform = 'translateX(0)';
+        renderAll();
+      });
+
+      document.getElementById('perPage').addEventListener('change', (e)=>{ state.perPage = parseInt(e.target.value, 10); state.page=1; renderAll(); });
+      document.getElementById('prevPage').addEventListener('click', ()=>{ if (state.page>1){ state.page--; renderAll(); } });
       document.getElementById('nextPage').addEventListener('click', ()=>{ state.page++; renderAll(); });
 
-      document.getElementById('selectAllPage').addEventListener('click', ()=>{ currentVisible().forEach(it=> state.selection.add(it.url)); renderAll(); });
-      document.getElementById('selectAllFiltered').addEventListener('click', ()=>{ applyFilters(state.items).forEach(it=> state.selection.add(it.url)); renderAll(); });
+      // bulk actions
+      document.getElementById('selectAllPage').addEventListener('click', ()=>{
+        currentVisible().forEach(it=> state.selection.add(it.url));
+        renderAll();
+      });
+      document.getElementById('selectAllFiltered').addEventListener('click', ()=>{
+        applyFilters(state.items).forEach(it=> state.selection.add(it.url));
+        renderAll();
+      });
       document.getElementById('clearSelection').addEventListener('click', ()=>{ state.selection.clear(); renderAll(); });
-      document.getElementById('copyLinks').addEventListener('click', ()=>{ const urls=[...(state.selection.size?state.selection:applyFilters(state.items).map(it=>it.url))]; copyList(urls); });
-      document.getElementById('copyFilenames').addEventListener('click', ()=>{ const list=[...(state.selection.size?state.selection:applyFilters(state.items).map(it=>it.url))].map(u=>u.split('/').pop()); copyList(list); });
-      document.getElementById('downloadCSV').addEventListener('click', ()=>{ const items=state.selection.size? state.items.filter(it=>state.selection.has(it.url)) : applyFilters(state.items); downloadCSVFromItems(items); });
-      document.addEventListener('keydown', e=>{ if(e.key==='/' && document.activeElement.tagName!=='INPUT'){ e.preventDefault(); document.getElementById('search').focus(); } if(e.key.toLowerCase()==='g'){ state.view='grid'; setViewButtons(); renderAll(); } if(e.key.toLowerCase()==='l'){ state.view='list'; setViewButtons(); renderAll(); } if(e.key.toLowerCase()==='f'){ document.getElementById('toggleAvail').click(); } if(e.key==='Escape'){ closeLight(); } });
+      document.getElementById('copyLinks').addEventListener('click', ()=>{ const urls = [...state.selection.size?state.selection:applyFilters(state.items).map(it=>it.url)]; copyList(urls); });
+      document.getElementById('copyFilenames').addEventListener('click', ()=>{ const list = [...(state.selection.size?state.selection:applyFilters(state.items).map(it=>it.url))].map(u=>u.split('/').pop()); copyList(list); });
+      document.getElementById('downloadCSV').addEventListener('click', ()=>{ const items = state.selection.size? state.items.filter(it=>state.selection.has(it.url)) : applyFilters(state.items); downloadCSVFromItems(items); });
+      document.getElementById('toggleFavs').addEventListener('click', (e)=>{ state.favoritesOnly = !state.favoritesOnly; e.currentTarget.classList.toggle('bg-black', state.favoritesOnly); e.currentTarget.classList.toggle('text-white', state.favoritesOnly); state.page=1; renderAll(); });
+
+      // keyboard shortcuts
+      document.addEventListener('keydown', (e)=>{
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); document.getElementById('search').focus(); }
+        if (e.key.toLowerCase() === 'g') { state.view='grid'; setViewButtons(); renderAll(); }
+        if (e.key.toLowerCase() === 'l') { state.view='list'; setViewButtons(); renderAll(); }
+        if (e.key.toLowerCase() === 'f') { document.getElementById('toggleAvail').click(); }
+        if (e.key === 'Escape') { closeLight(); }
+      });
+
+      // lightbox
       document.getElementById('closeLightbox').addEventListener('click', closeLight);
-      document.getElementById('lightbox').addEventListener('click', e=>{ if(e.target.id==='lightbox') closeLight(); });
+      document.getElementById('lightbox').addEventListener('click', (e)=>{ if (e.target.id === 'lightbox') closeLight(); });
 
       // hide loader
-      document.getElementById('loading').style.display='none';
+      document.getElementById('loading').style.display = 'none';
     })();
   </script>
 </body>
